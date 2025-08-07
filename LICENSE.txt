@@ -1,0 +1,13 @@
+Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
+
+All rights reserved.
+
+This software and associated files (the “Software”) are the exclusive property of the author.
+Unauthorized use, reproduction, distribution, modification, or disclosure of this Software, in whole or in part, is strictly prohibited.
+
+The Software is intended for personal or internal use only.
+Commercial use, sublicensing, or redistribution is forbidden without prior written consent from the author.
+
+By accessing or using this Software, you agree to be bound by these terms.
+
+Contact: Fabien Grolier

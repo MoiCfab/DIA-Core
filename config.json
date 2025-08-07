@@ -1,0 +1,23 @@
+{
+  "mode": "dry_run",
+  "exchange": {
+    "symbol": "BTC/EUR",
+    "price_decimals": 2,
+    "qty_decimals": 6,
+    "min_qty": 0.0001,
+    "min_notional": 10.0
+  },
+  "risk": {
+    "max_daily_loss_pct": 2.0,
+    "max_drawdown_pct": 15.0,
+    "max_exposure_pct": 50.0,
+    "risk_per_trade_pct": 0.5,
+    "max_orders_per_min": 30
+  },
+  "data_window_bars": 1000,
+  "cache_dir": "state/cache",
+  "journal_path": "state/journal.sqlite",
+  "log_dir": "logs",
+  "pair": "XXBTZEUR",
+  "require_interactive_confirm": true
+}
