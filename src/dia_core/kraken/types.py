@@ -5,6 +5,7 @@ from typing import Literal, Optional
 Side = Literal["buy", "sell"]
 OrderType = Literal["market", "limit"]
 
+
 class OrderIntent(BaseModel):
     symbol: str
     side: Side
@@ -12,6 +13,7 @@ class OrderIntent(BaseModel):
     qty: float
     limit_price: Optional[float] = None
     time_in_force: Literal["GTC", "IOC"] = "GTC"
+
 
 class SubmittedOrder(BaseModel):
     client_order_id: str

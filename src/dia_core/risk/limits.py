@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pydantic import BaseModel
 
+
 class RiskLimits(BaseModel):
     max_daily_loss_pct: float = 2.0
     max_drawdown_pct: float = 15.0

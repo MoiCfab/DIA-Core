@@ -3,6 +3,7 @@ import json
 from pydantic import ValidationError
 from .models import AppConfig
 
+
 def load_config(path: str) -> AppConfig:
     try:
         with open(path, "r", encoding="utf-8") as f:

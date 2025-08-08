@@ -4,6 +4,7 @@ from typing import Literal
 
 Mode = Literal["dry_run", "paper", "live"]
 
+
 class ExchangeMeta(BaseModel):
     symbol: str = Field(..., description="Paire ex: 'BTC/EUR'")
     price_decimals: int = 2
@@ -11,12 +12,14 @@ class ExchangeMeta(BaseModel):
     min_qty: float = 0.0001
     min_notional: float = 10.0
 
+
 class RiskLimits(BaseModel):
     max_daily_loss_pct: float = 2.0
     max_drawdown_pct: float = 15.0
     max_exposure_pct: float = 50.0
     risk_per_trade_pct: float = 0.5
     max_orders_per_min: int = 30
+
 
 class AppConfig(BaseModel):
     mode: Mode = "dry_run"

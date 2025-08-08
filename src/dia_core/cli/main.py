@@ -15,7 +15,9 @@ from dia_core.data.provider import load_ohlc_window
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="dia-core")
-    parser.add_argument("--config", default="config.json", help="Chemin vers le fichier de configuration")
+    parser.add_argument(
+        "--config", default="config.json", help="Chemin vers le fichier de configuration"
+    )
     parser.add_argument("--version", action="store_true", help="Afficher la version et quitter")
     args = parser.parse_args()
 
@@ -41,7 +43,9 @@ def main() -> None:
     client = KrakenClient()
 
     # Charger les OHLC (par ex. intervalle 1 minute, 100 dernières bougies)
-    df = load_ohlc_window(client, pair=cfg.pair, interval=1, window_bars=100, cache_dir=cfg.cache_dir)
+    df = load_ohlc_window(
+        client, pair=cfg.pair, interval=1, window_bars=100, cache_dir=cfg.cache_dir
+    )
     print(df.head())
 
     # Initialiser Executor (dry_run par défaut)
@@ -49,34 +53,31 @@ def main() -> None:
         client,
         mode=cfg.mode,
         min_notional=cfg.exchange.min_notional,
-        require_interactive_confirm=cfg.require_interactive_confirm
+        require_interactive_confirm=cfg.require_interactive_confirm,
     )
 
     # Ouvrir base SQLite
     conn = journal.open_db(cfg.journal_path)
 
     # Exemple : soumettre un ordre dry-run
-    intent = OrderIntent(
-        symbol=cfg.pair,
-        side="buy",
-        type="limit",
-        qty=0.001,
-        limit_price=20000.0
-    )
+    intent = OrderIntent(symbol=cfg.pair, side="buy", type="limit", qty=0.001, limit_price=20000.0)
     result = executor.submit(intent, equity=1000.0)
 
     # Enregistrer dans le journal
-    journal.insert_order(conn, {
-        "id": result.client_order_id,
-        "ts": int(time.time() * 1000),
-        "symbol": intent.symbol,
-        "side": intent.side,
-        "type": intent.type,
-        "qty": intent.qty,
-        "price": intent.limit_price,
-        "status": result.status,
-        "reason": result.reason
-    })
+    journal.insert_order(
+        conn,
+        {
+            "id": result.client_order_id,
+            "ts": int(time.time() * 1000),
+            "symbol": intent.symbol,
+            "side": intent.side,
+            "type": intent.type,
+            "qty": intent.qty,
+            "price": intent.limit_price,
+            "status": result.status,
+            "reason": result.reason,
+        },
+    )
     journal.log_event(conn, "INFO", "cli", f"Ordre {result.status} enregistré")
 
     # Afficher résultat

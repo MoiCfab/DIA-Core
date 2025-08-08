@@ -1,7 +1,12 @@
 from __future__ import annotations
-import logging, os, json, gzip, shutil
+import logging
+import os
+import json
+import gzip
+import shutil
 from logging.handlers import RotatingFileHandler
 from typing import Any, Dict
+
 
 class JsonLogFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
@@ -16,6 +21,7 @@ class JsonLogFormatter(logging.Formatter):
                 payload[k] = getattr(record, k)
         return json.dumps(payload, ensure_ascii=False)
 
+
 class GzipRotatingFileHandler(RotatingFileHandler):
     def doRollover(self) -> None:
         super().doRollover()
@@ -25,6 +31,7 @@ class GzipRotatingFileHandler(RotatingFileHandler):
                 with open(fn, "rb") as src, gzip.open(fn + ".gz", "wb") as dst:
                     shutil.copyfileobj(src, dst)
                 os.remove(fn)
+
 
 def setup_logging(log_dir: str, level: int = logging.INFO) -> None:
     os.makedirs(log_dir, exist_ok=True)

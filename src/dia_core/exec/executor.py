@@ -1,5 +1,6 @@
 from __future__ import annotations
-import logging, uuid
+import logging
+import uuid
 from typing import Literal
 from dia_core.kraken.client import KrakenClient
 from dia_core.kraken.types import OrderIntent, SubmittedOrder
@@ -9,10 +10,16 @@ from dia_core.exec.pre_trade import pre_trade_checks
 logger = logging.getLogger(__name__)
 Mode = Literal["dry_run", "paper", "live"]
 
+
 class Executor:
-    def __init__(self, client: KrakenClient, mode: Mode = "dry_run",
-                 min_notional: float = 10.0, limits: RiskLimits | None = None,
-                 require_interactive_confirm: bool = True):
+    def __init__(
+        self,
+        client: KrakenClient,
+        mode: Mode = "dry_run",
+        min_notional: float = 10.0,
+        limits: RiskLimits | None = None,
+        require_interactive_confirm: bool = True,
+    ):
         self.client = client
         self.mode = mode
         self.min_notional = min_notional
@@ -30,14 +37,18 @@ class Executor:
         res = pre_trade_checks(intent, self.limits, equity, self.min_notional)
         if not res.ok:
             logger.warning("Ordre refusé", extra={"component": "executor", "reason": res.reason})
-            return SubmittedOrder(client_order_id=str(uuid.uuid4()), status="rejected", reason=res.reason)
+            return SubmittedOrder(
+                client_order_id=str(uuid.uuid4()), status="rejected", reason=res.reason
+            )
 
         if self.mode == "dry_run":
             logger.info("Dry-run : ordre simulé", extra={"component": "executor"})
             return SubmittedOrder(client_order_id=str(uuid.uuid4()), status="accepted")
 
         if self.mode == "paper":
-            logger.info("Paper : ordre enregistré (pas d'envoi exchange)", extra={"component": "executor"})
+            logger.info(
+                "Paper : ordre enregistré (pas d'envoi exchange)", extra={"component": "executor"}
+            )
             return SubmittedOrder(client_order_id=str(uuid.uuid4()), status="accepted")
 
         # LIVE MODE

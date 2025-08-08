@@ -1,5 +1,10 @@
 from __future__ import annotations
-import os, time, hmac, hashlib, base64, logging
+import os
+import time
+import hmac
+import hashlib
+import base64
+import logging
 from typing import Any, Dict, Optional
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -8,24 +13,32 @@ from .errors import KrakenNetworkError, KrakenRateLimit, KrakenAuthError
 logger = logging.getLogger(__name__)
 KRAKEN_API_URL = "https://api.kraken.com"
 
+
 def _nonce() -> str:
     return str(int(time.time() * 1000))
 
+
 def _sign(path: str, data: Dict[str, Any], secret: str) -> str:
     postdata = httpx.QueryParams(data).encode()
-    encoded = (str(data.get("nonce")).encode() + postdata)
+    encoded = str(data.get("nonce")).encode() + postdata
     message = path.encode() + hashlib.sha256(encoded).digest()
     mac = hmac.new(base64.b64decode(secret), message, hashlib.sha512)
     return base64.b64encode(mac.digest()).decode()
 
+
 class KrakenClient:
-    def __init__(self, key: Optional[str] = None, secret: Optional[str] = None, timeout: float = 10.0):
+    def __init__(
+        self, key: Optional[str] = None, secret: Optional[str] = None, timeout: float = 10.0
+    ):
         self.key = key or os.getenv("KRAKEN_API_KEY", "")
         self.secret = secret or os.getenv("KRAKEN_API_SECRET", "")
         self.timeout = timeout
         self._client = httpx.Client(timeout=self.timeout)
         if not self.key or not self.secret:
-            logger.warning("Kraken API keys not set; private endpoints will fail.", extra={"component": "kraken"})
+            logger.warning(
+                "Kraken API keys not set; private endpoints will fail.",
+                extra={"component": "kraken"},
+            )
 
     @retry(
         reraise=True,
@@ -33,7 +46,9 @@ class KrakenClient:
         wait=wait_exponential(multiplier=0.5, min=0.5, max=4),
         retry=retry_if_exception_type((KrakenNetworkError, KrakenRateLimit)),
     )
-    def _request(self, method: str, path: str, data: Optional[Dict[str, Any]] = None, private: bool = False) -> Dict[str, Any]:
+    def _request(
+        self, method: str, path: str, data: Optional[Dict[str, Any]] = None, private: bool = False
+    ) -> Dict[str, Any]:
         url = f"{KRAKEN_API_URL}{path}"
         headers = {}
         data = data or {}
@@ -49,7 +64,9 @@ class KrakenClient:
             else:
                 r = self._client.get(url, params=data, headers=headers)
         except httpx.RequestError as e:
-            logger.warning("Network error to Kraken", extra={"component": "kraken", "reason": str(e)})
+            logger.warning(
+                "Network error to Kraken", extra={"component": "kraken", "reason": str(e)}
+            )
             raise KrakenNetworkError(str(e)) from e
 
         if r.status_code == 429:
