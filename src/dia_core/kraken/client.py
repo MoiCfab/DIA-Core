@@ -62,7 +62,9 @@ class KrakenClient:
         max_attempts: int = 3,
     ) -> Dict[str, Any]:
         url = path
-        headers: Dict[str, str] = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
+        headers: Dict[str, str] = {
+            "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+        }
 
         body: bytes | None = None
         if private:
@@ -82,7 +84,9 @@ class KrakenClient:
         last_exc: Exception | None = None
         for attempt in range(1, max_attempts + 1):
             try:
-                resp = self._client.request(method, url, params=params, content=body, headers=headers)
+                resp = self._client.request(
+                    method, url, params=params, content=body, headers=headers
+                )
                 # Mapping HTTP
                 if resp.status_code == 429:
                     raise RateLimitError("Rate limit (429)")
