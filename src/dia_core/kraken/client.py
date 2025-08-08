@@ -1,105 +1,124 @@
 from __future__ import annotations
-import os
-import time
-import hmac
-import hashlib
+
 import base64
+import hashlib
+import hmac
+import json
 import logging
-import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+import time
+from typing import Any, Dict, Optional
 from urllib.parse import urlencode
-from typing import no_type_check, Any, Dict, cast, Optional
-from .errors import KrakenNetworkError, KrakenRateLimit, KrakenAuthError
 
-logger = logging.getLogger(__name__)
-KRAKEN_API_URL = "https://api.kraken.com"
+import httpx
 
+from .errors import AuthError, ConnectivityError, OrderRejected, RateLimitError
 
-def _nonce() -> str:
-    return str(int(time.time() * 1000))
+Logger = logging.getLoggerClass()
+logger = logging.getLogger("dia_core.kraken")
 
 
 def _sign(path: str, data: Dict[str, Any], secret: str) -> str:
-    # httpx.QueryParams n'a pas .encode(); on construit le body en x-www-form-urlencoded
-    postdata = urlencode(data or {}, doseq=True).encode()
-    encoded = str(data.get("nonce")).encode() + postdata
-    message = path.encode() + hashlib.sha256(encoded).digest()
-    mac = hmac.new(base64.b64decode(secret), message, hashlib.sha512)
+    # Kraken signature: base64(hmac_sha512(sha256(nonce+postdata) + path, secret))
+    # Pour nos tests unitaires, le détail exact n'est pas utilisé; implémentation conforme.
+    postdata = urlencode(data or {}, doseq=True)
+    sha = hashlib.sha256((str(data.get("nonce", "")) + postdata).encode()).digest()
+    msg = path.encode() + sha
+    mac = hmac.new(base64.b64decode(secret), msg, hashlib.sha512)
     return base64.b64encode(mac.digest()).decode()
 
 
 class KrakenClient:
     def __init__(
-        self, key: Optional[str] = None, secret: Optional[str] = None, timeout: float = 10.0
-    ):
-        self.key = key or os.getenv("KRAKEN_API_KEY", "")
-        self.secret = secret or os.getenv("KRAKEN_API_SECRET", "")
-        self.timeout = timeout
-        self._client = httpx.Client(timeout=self.timeout)
-        if not self.key or not self.secret:
-            logger.warning(
-                "Kraken API keys not set; private endpoints will fail.",
-                extra={"component": "kraken"},
-            )
+        self,
+        base_url: str = "https://api.kraken.com",
+        *,
+        key: Optional[str] = None,
+        secret: Optional[str] = None,
+        dry_run: bool = True,
+        timeout_s: float = 10.0,
+        transport: httpx.BaseTransport | None = None,  # pour tests
+    ) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.key = key
+        self.secret = secret
+        self.dry_run = dry_run
+        self._client = httpx.Client(
+            base_url=self.base_url,
+            timeout=httpx.Timeout(timeout_s),
+            transport=transport,
+            headers={"User-Agent": "DIA-Core/kraken"},
+        )
 
-    @no_type_check
-    @retry(
-        reraise=True,
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=0.5, min=1, max=5),
-        retry=retry_if_exception_type(Exception),
-    )
+    def close(self) -> None:
+        self._client.close()
+
+    # ---------- Core request avec retries ----------
     def _request(
         self,
         method: str,
         path: str,
-        params: dict[str, Any] | None = None,
-        data: dict[str, Any] | None = None,
+        params: Dict[str, Any] | None = None,
+        data: Dict[str, Any] | None = None,
         private: bool = False,
-    ) -> dict[str, Any]:
+        max_attempts: int = 3,
+    ) -> Dict[str, Any]:
+        url = path
+        headers: Dict[str, str] = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
 
-        url = f"{KRAKEN_API_URL}{path}"
-        headers = {}
-        data = data or {}
-
+        body: bytes | None = None
         if private:
-            data["nonce"] = _nonce()
+            if not self.key or not self.secret:
+                raise AuthError("Kraken API key/secret not configured")
+            assert self.secret is not None
+            data = dict(data or {})
+            data.setdefault("nonce", int(time.time() * 1000))
             headers["API-Key"] = self.key
             headers["API-Sign"] = _sign(path, data, self.secret)
+            body = urlencode(data, doseq=True).encode()
+        else:
+            body = None
 
-        try:
-            if method == "POST":
-                r = self._client.post(url, data=data, headers=headers)
-            else:
-                r = self._client.get(url, params=data, headers=headers)
-        except httpx.RequestError as e:
-            logger.warning(
-                "Network error to Kraken", extra={"component": "kraken", "reason": str(e)}
-            )
-            raise KrakenNetworkError(str(e)) from e
+        # Boucle de retries simple: erreurs réseau et 5xx
+        backoff = 0.5
+        last_exc: Exception | None = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                resp = self._client.request(method, url, params=params, content=body, headers=headers)
+                # Mapping HTTP
+                if resp.status_code == 429:
+                    raise RateLimitError("Rate limit (429)")
+                if resp.status_code in (401, 403):
+                    raise AuthError(f"Auth error ({resp.status_code})")
+                if 500 <= resp.status_code < 600:
+                    raise ConnectivityError(f"Server error {resp.status_code}")
 
-        if r.status_code == 429:
-            raise KrakenRateLimit("Rate limited by Kraken")
-        if r.status_code in (401, 403):
-            raise KrakenAuthError("Auth failed")
-        if r.status_code >= 500:
-            raise KrakenNetworkError(f"Server error {r.status_code}")
+                payload = resp.json()
+                # Kraken renvoie {"error": [...], "result": {...}}
+                if isinstance(payload, dict) and payload.get("error"):
+                    raise OrderRejected(str(payload["error"]))
 
-        payload = r.json()
-        if payload.get("error"):
-            raise KrakenNetworkError(str(payload["error"]))
+                if isinstance(payload, dict):
+                    return payload  # dict[str, Any]
+                # Si Kraken renvoie autre chose (peu probable), on uniformise
+                return {"result": payload}
+            except (httpx.HTTPError, ConnectivityError) as exc:
+                last_exc = exc
+                if attempt >= max_attempts:
+                    break
+                time.sleep(backoff)
+                backoff *= 2.0
 
-        # mypy: assure qu'on renvoie bien un dict[str, Any]
-        result = payload.get("result", payload)
-        return cast(Dict[str, Any], result)
+        assert last_exc is not None
+        raise ConnectivityError(f"Network failure after retries: {last_exc!r}")
 
-    # Exemple public : OHLC
-    def get_ohlc(self, pair: str, interval: int = 1) -> dict[str, Any]:
+    # ---------- Endpoints utiles ----------
+    def get_ohlc(self, pair: str, interval: int = 1) -> Dict[str, Any]:
         params = {"pair": pair, "interval": interval}
-        return cast(Dict[str, Any], self._request("GET", "/0/public/OHLC", params, private=False))
+        return self._request("GET", "/0/public/OHLC", params=params, private=False)
 
-    # Exemple privé : création d'ordre
-    def add_order(self, data: dict[str, Any]) -> dict[str, Any]:
-        return cast(
-            Dict[str, Any], self._request("POST", "/0/private/AddOrder", data, private=True)
-        )
+    def add_order(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        if self.dry_run:
+            fake_tx = f"DIA-DRYRUN-{int(time.time()*1000)}"
+            logger.info("Dry-run AddOrder", extra={"extra": {"txid": fake_tx}})
+            return {"result": {"txid": [fake_tx]}}
+        return self._request("POST", "/0/private/AddOrder", data=data, private=True)
