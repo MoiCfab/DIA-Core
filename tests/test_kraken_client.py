@@ -13,7 +13,7 @@ from dia_core.kraken.errors import AuthError, ConnectivityError, RateLimitError
 def _transport_with_sequence(responses: list[httpx.Response]) -> httpx.MockTransport:
     it = iter(responses)
 
-    def handler(request: httpx.Request) -> httpx.Response:  # type: ignore[override]
+    def handler(request: httpx.Request) -> httpx.Response: 
         try:
             return next(it)
         except StopIteration:
@@ -67,7 +67,7 @@ def test_auth_error_raises() -> None:
 def test_add_order_dry_run() -> None:
     called = {"n": 0}
 
-    def handler(request: httpx.Request) -> httpx.Response:  # type: ignore[override]
+    def handler(request: httpx.Request) -> httpx.Response:
         called["n"] += 1
         return httpx.Response(200, json={"error": [], "result": {"txid": ["should-not-be-used"]}})
 
