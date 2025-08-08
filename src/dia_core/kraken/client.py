@@ -7,6 +7,7 @@ import base64
 import logging
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from urllib.parse import urlencode
 from typing import no_type_check, Any, Dict, cast, Optional
 from .errors import KrakenNetworkError, KrakenRateLimit, KrakenAuthError
 
@@ -19,7 +20,8 @@ def _nonce() -> str:
 
 
 def _sign(path: str, data: Dict[str, Any], secret: str) -> str:
-    postdata = httpx.QueryParams(data).encode()
+    # httpx.QueryParams n'a pas .encode(); on construit le body en x-www-form-urlencoded
+    postdata = urlencode(data or {}, doseq=True).encode()
     encoded = str(data.get("nonce")).encode() + postdata
     message = path.encode() + hashlib.sha256(encoded).digest()
     mac = hmac.new(base64.b64decode(secret), message, hashlib.sha512)
