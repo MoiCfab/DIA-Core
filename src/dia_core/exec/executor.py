@@ -5,7 +5,7 @@ from typing import Literal
 from dia_core.kraken.client import KrakenClient
 from dia_core.kraken.types import OrderIntent, SubmittedOrder
 from dia_core.risk.limits import RiskLimits
-from dia_core.exec.pre_trade import propose_order
+from dia_core.exec.pre_trade import pre_trade_checks
 
 logger = logging.getLogger(__name__)
 Mode = Literal["dry_run", "paper", "live"]
@@ -34,7 +34,7 @@ class Executor:
 
     def submit(self, intent: OrderIntent, equity: float) -> SubmittedOrder:
         # Validation risque
-        res = propose_order(intent, self.limits, equity, self.min_notional)
+        res = pre_trade_checks(intent, self.limits, equity, self.min_notional)
         if not res.ok:
             logger.warning("Ordre refusé", extra={"component": "executor", "reason": res.reason})
             return SubmittedOrder(

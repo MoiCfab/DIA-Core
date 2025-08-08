@@ -2,10 +2,19 @@ from __future__ import annotations
 
 from typing import Dict
 
+from dia_core.kraken.types import OrderIntent
 from dia_core.config.models import AppConfig
 from dia_core.risk.sizing import compute_position_size
-from dia_core.risk.validator import validate_order
+from dia_core.risk.validator import validate_order, ValidationResult
 from dia_core.risk.errors import RiskLimitExceeded
+from dia_core.risk.limits import RiskLimits
+
+
+def pre_trade_checks(
+    intent: OrderIntent, limits: RiskLimits, equity: float, min_notional: float
+) -> ValidationResult:
+    """Applique les validations avant l'envoi d'un ordre."""
+    return validate_order(intent, limits, equity, min_notional)
 
 
 def propose_order(
