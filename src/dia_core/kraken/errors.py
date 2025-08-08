@@ -15,7 +15,3 @@ class AuthError(RuntimeError):
 
 class OrderRejected(RuntimeError):
     """Rejet d'ordre renvoyé par l'API (payload['error'] non vide)."""
-
-
-class RiskLimitExceeded(RuntimeError):
-    """Le trade viole au moins une limite de risque (hard-stop)."""
