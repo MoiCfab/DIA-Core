@@ -26,25 +26,25 @@ def validate_order(
     if projected_exposure_pct > limits.max_exposure_pct:
         return ValidationResult(
             allowed=False,
-            reason=f"max_exposure_pct {projected_exposure_pct:.2f}% > {limits.max_exposure_pct:.2f}%"
+            reason=f"max_exposure_pct {projected_exposure_pct:.2f}% > {limits.max_exposure_pct:.2f}%",
         )
 
     if daily_loss_pct > limits.max_daily_loss_pct:
         return ValidationResult(
             allowed=False,
-            reason=f"max_daily_loss_pct {daily_loss_pct:.2f}% > {limits.max_daily_loss_pct:.2f}%"
+            reason=f"max_daily_loss_pct {daily_loss_pct:.2f}% > {limits.max_daily_loss_pct:.2f}%",
         )
 
     if drawdown_pct > limits.max_drawdown_pct:
         return ValidationResult(
             allowed=False,
-            reason=f"max_drawdown_pct {drawdown_pct:.2f}% > {limits.max_drawdown_pct:.2f}%"
+            reason=f"max_drawdown_pct {drawdown_pct:.2f}% > {limits.max_drawdown_pct:.2f}%",
         )
 
     if orders_last_min >= limits.max_orders_per_min:
         return ValidationResult(
             allowed=False,
-            reason=f"max_orders_per_min {orders_last_min} >= {limits.max_orders_per_min}"
+            reason=f"max_orders_per_min {orders_last_min} >= {limits.max_orders_per_min}",
         )
 
     # Exposition actuelle informatif; le blocage se fait sur la projection

@@ -39,8 +39,8 @@ def propose_order(
         cfg.risk,
         current_exposure_pct=current_exposure_pct,
         projected_exposure_pct=projected_exposure_pct,
-        daily_loss_pct=0.0,      # à injecter depuis le monitoring PnL
-        drawdown_pct=0.0,        # idem
+        daily_loss_pct=0.0,  # à injecter depuis le monitoring PnL
+        drawdown_pct=0.0,  # idem
         orders_last_min=orders_last_min,
     )
     if not res.allowed:

@@ -40,7 +40,7 @@ def test_sizing_min_qty_notional_respected() -> None:
         atr=0.5,
         risk_per_trade_pct=0.5,
         k_atr=2.0,
-        min_qty=0.003,          # > computed qty?
+        min_qty=0.003,  # > computed qty?
         min_notional=10.0,
         qty_decimals=3,
     )

@@ -4,7 +4,7 @@ from typing import Final
 
 
 def _round_decimals(value: float, decimals: int) -> float:
-    q: float = 10.0 ** decimals
+    q: float = 10.0**decimals
     return int(value * q) / q
 
 
