@@ -94,12 +94,10 @@ class KrakenClient:
         return cast(Dict[str, Any], result)
 
     # Exemple public : OHLC
-    def get_ohlc(self, pair: str, interval: int = 5, since: Optional[int] = None) -> Dict[str, Any]:
+    def get_ohlc(self, pair: str, interval: int = 1) -> dict[str, Any]:
         params = {"pair": pair, "interval": interval}
-        if since:
-            params["since"] = since
-        return self._request("GET", "/0/public/OHLC", params, private=False)
+        return cast(Dict[str, Any], self._request("GET", "/0/public/OHLC", params, private=False))
 
     # Exemple privé : création d'ordre
-    def add_order(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        return self._request("POST", "/0/private/AddOrder", data, private=True)
+    def add_order(self, data: dict[str, Any]) -> dict[str, Any]:
+        return cast(Dict[str, Any], self._request("POST", "/0/private/AddOrder", data, private=True))
