@@ -13,7 +13,7 @@ from dia_core.kraken.errors import AuthError, ConnectivityError, RateLimitError
 def _transport_with_sequence(responses: list[httpx.Response]) -> httpx.MockTransport:
     it = iter(responses)
 
-    def handler(request: httpx.Request) -> httpx.Response: 
+    def handler(request: httpx.Request) -> httpx.Response:
         try:
             return next(it)
         except StopIteration:
