@@ -1,28 +1,17 @@
-class KrakenError(Exception):
-    """Erreur générique Kraken."""
-
-    pass
+from __future__ import annotations
 
 
-class KrakenNetworkError(KrakenError):
-    """Erreur réseau ou serveur Kraken."""
-
-    pass
+class ConnectivityError(RuntimeError):
+    """Erreurs réseau (timeout, DNS, 5xx après retries)."""
 
 
-class KrakenRateLimit(KrakenError):
-    """Trop de requêtes envoyées."""
-
-    pass
+class RateLimitError(RuntimeError):
+    """HTTP 429 (rate limit) ou message équivalent côté Kraken."""
 
 
-class KrakenAuthError(KrakenError):
-    """Problème d'authentification API."""
-
-    pass
+class AuthError(RuntimeError):
+    """HTTP 401/403 ou auth invalide côté Kraken."""
 
 
-class KrakenRejectedOrder(KrakenError):
-    """Ordre refusé par Kraken."""
-
-    pass
+class OrderRejected(RuntimeError):
+    """Rejet d'ordre renvoyé par l'API (payload['error'] non vide)."""
