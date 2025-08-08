@@ -1,41 +1,31 @@
 [build-system]
-requires = ["setuptools>=70", "wheel"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[project]
-name = "dia-core"
-version = "1.0.0a1"
-description = "DIA-Core bot: local-first, secure, scalable trading system"
-readme = "README.md"
-requires-python = ">=3.11"
-authors = [{name="Fabien Grolier"}]
-dependencies = [
-  "pydantic>=2.7,<3",
-  "httpx>=0.27,<0.28",
-  "tenacity>=8.2,<9",
-  "python-dotenv>=1.0,<2",
-  "pandas>=2.2,<3",
-  "pyarrow>=16,<17",
-]
-
-[project.scripts]
-dia-core = "dia_core.cli.main:main"
-
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+skip-string-normalization = false
+preview = true
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
+# On appelle ruff uniquement sur src/ et tests/ dans la CI et localement,
+# donc pas besoin d'exclusions complexes ici. (Pas de blocage sur legacy.)
+
 [tool.mypy]
 python_version = "3.11"
-warn_unused_configs = true
-warn_redundant_casts = true
-warn_unused_ignores = true
 strict = true
-plugins = []
+warn_unused_configs = true
+ignore_missing_imports = false
+show_error_codes = true
+pretty = true
+# On contraint l'analyse aux chemins passés en CLI (src/ et tests/).
+# Évite de scanner du legacy hors périmètre.
 
 [tool.pytest.ini_options]
-addopts = "-q --maxfail=1"
+testpaths = ["tests"]
+addopts = "-q"
 pythonpath = ["src"]
