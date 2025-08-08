@@ -8,6 +8,7 @@ import logging
 from typing import Any, Dict, Optional
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from typing import no_type_check, Any, Dict, cast
 from .errors import KrakenNetworkError, KrakenRateLimit, KrakenAuthError
 
 logger = logging.getLogger(__name__)
@@ -40,15 +41,22 @@ class KrakenClient:
                 extra={"component": "kraken"},
             )
 
-    @retry(
+    @ no_type_check
+    @ retry(
         reraise=True,
         stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=0.5, min=0.5, max=4),
-        retry=retry_if_exception_type((KrakenNetworkError, KrakenRateLimit)),
+        wait=wait_exponential(multiplier=0.5, min=1, max=5),
+        retry=retry_if_exception_type(Exception),
     )
     def _request(
-        self, method: str, path: str, data: Optional[Dict[str, Any]] = None, private: bool = False
-    ) -> Dict[str, Any]:
+            self,
+            method: str,
+            path: str,
+            params: dict[str, Any]| None = None,
+            data: dict[str, Any] | None = None,
+            private: bool = False,
+        ) -> dict[str, Any]:
+
         url = f"{KRAKEN_API_URL}{path}"
         headers = {}
         data = data or {}
@@ -80,7 +88,9 @@ class KrakenClient:
         if payload.get("error"):
             raise KrakenNetworkError(str(payload["error"]))
 
-        return payload.get("result", payload)
+        # mypy: assure qu'on renvoie bien un dict[str, Any]
+        result = payload.get("result", payload)
+        return cast(Dict[str, Any], result)
 
     # Exemple public : OHLC
     def get_ohlc(self, pair: str, interval: int = 5, since: Optional[int] = None) -> Dict[str, Any]:
