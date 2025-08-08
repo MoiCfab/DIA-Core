@@ -35,7 +35,7 @@ class Executor:
     def submit(self, intent: OrderIntent, equity: float) -> SubmittedOrder:
         # Validation risque
         res = pre_trade_checks(intent, self.limits, equity, self.min_notional)
-        if not res.ok:
+        if not res.allowed:
             logger.warning("Ordre refusé", extra={"component": "executor", "reason": res.reason})
             return SubmittedOrder(
                 client_order_id=str(uuid.uuid4()), status="rejected", reason=res.reason
