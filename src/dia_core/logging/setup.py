@@ -19,7 +19,7 @@ class _TradeIdFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:  # noqa: D401
         # Ajoute l'attribut si absent
         if not hasattr(record, "trade_id"):
-            record.trade_id = self._trade_id  # type: ignore[attr-defined]
+            record.trade_id = self._trade_id
         return True
 
 
@@ -69,7 +69,7 @@ def setup_logging(
     """
     logger = logging.getLogger("dia_core")
     # Évite reconfiguration
-    if getattr(logger, "_configured", False):  # type: ignore[attr-defined]
+    if getattr(logger, "_configured", False):
         return logger
 
     Path(log_dir).mkdir(parents=True, exist_ok=True)
@@ -82,8 +82,8 @@ def setup_logging(
         encoding="utf-8",
     )
     # Rotation compressée
-    handler.rotator = _gzip_rotator  # type: ignore[assignment]
-    handler.namer = _gz_namer  # type: ignore[assignment]
+    handler.rotator = _gzip_rotator 
+    handler.namer = _gz_namer
 
     handler.setFormatter(_JsonFormatter())
     handler.addFilter(_TradeIdFilter(trade_id))
