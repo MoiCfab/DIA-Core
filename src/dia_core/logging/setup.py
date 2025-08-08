@@ -82,13 +82,18 @@ def setup_logging(
         encoding="utf-8",
     )
     # Rotation compressée
-    handler.rotator = _gzip_rotator 
+    handler.rotator = _gzip_rotator
     handler.namer = _gz_namer
 
     handler.setFormatter(_JsonFormatter())
     handler.addFilter(_TradeIdFilter(trade_id))
 
-    logger.setLevel(getattr(logging, level.upper(), logging.INFO))
+    # Si c’est un int (ex: logging.INFO), on l’utilise directement
+    if isinstance(level, int):
+        lvl_num = level
+    else:
+        lvl_num = getattr(logging, level.upper(), logging.INFO)
+    logger.setLevel(lvl_num)
     logger.addHandler(handler)
     logger.propagate = False  # évite les doublons vers le root
 
