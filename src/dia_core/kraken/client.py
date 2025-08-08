@@ -5,10 +5,9 @@ import hmac
 import hashlib
 import base64
 import logging
-from typing import Any, Dict, Optional
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-from typing import no_type_check, Any, Dict, cast
+from typing import no_type_check, Any, Dict, cast, Optional
 from .errors import KrakenNetworkError, KrakenRateLimit, KrakenAuthError
 
 logger = logging.getLogger(__name__)
