@@ -3,7 +3,7 @@ from __future__ import annotations
 from pydantic import BaseModel
 from typing import Optional
 
-from dia_core.config.models import RiskLimits
+from dia_core.config.models import RiskLimits as ConfigRiskLimits
 
 
 class ValidationResult(BaseModel):
@@ -12,7 +12,7 @@ class ValidationResult(BaseModel):
 
 
 def validate_order(
-    limits: RiskLimits,
+    limits: ConfigRiskLimits,
     *,
     current_exposure_pct: float,
     projected_exposure_pct: float,
