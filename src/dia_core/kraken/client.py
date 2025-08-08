@@ -42,21 +42,21 @@ class KrakenClient:
                 extra={"component": "kraken"},
             )
 
-    @ no_type_check
-    @ retry(
+    @no_type_check
+    @retry(
         reraise=True,
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=0.5, min=1, max=5),
         retry=retry_if_exception_type(Exception),
     )
     def _request(
-            self,
-            method: str,
-            path: str,
-            params: dict[str, Any]| None = None,
-            data: dict[str, Any] | None = None,
-            private: bool = False,
-        ) -> dict[str, Any]:
+        self,
+        method: str,
+        path: str,
+        params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        private: bool = False,
+    ) -> dict[str, Any]:
 
         url = f"{KRAKEN_API_URL}{path}"
         headers = {}
@@ -100,4 +100,6 @@ class KrakenClient:
 
     # Exemple privé : création d'ordre
     def add_order(self, data: dict[str, Any]) -> dict[str, Any]:
-        return cast(Dict[str, Any], self._request("POST", "/0/private/AddOrder", data, private=True))
+        return cast(
+            Dict[str, Any], self._request("POST", "/0/private/AddOrder", data, private=True)
+        )
