@@ -67,7 +67,7 @@ def propose_order(
         current_exposure_pct=current_exposure_pct,
         projected_exposure_pct=projected_exposure_pct,
         daily_loss_pct=0.0,  # TODO: brancher métrique réelle depuis le monitoring PnL
-        drawdown_pct=0.0,    # TODO: idem
+        drawdown_pct=0.0,  # TODO: idem
         orders_last_min=orders_last_min,
     )
     if not res.allowed:
