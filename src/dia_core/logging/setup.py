@@ -82,7 +82,7 @@ def setup_logging(
         encoding="utf-8",
     )
     # Rotation compressée
-    handler.rotator = _gzip_rotator 
+    handler.rotator = _gzip_rotator
     handler.namer = _gz_namer
 
     handler.setFormatter(_JsonFormatter())
