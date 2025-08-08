@@ -32,7 +32,7 @@ def main() -> None:
     cfg = load_config(args.config)
 
     # Initialiser logging structuré
-    setup_logging(cfg.log_dir, level=logging.INFO)
+    setup_logging(cfg.log_dir, level="INFO")
 
     logging.getLogger(__name__).info(
         "DIA-Core démarré",
