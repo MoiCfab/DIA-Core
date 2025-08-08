@@ -22,6 +22,7 @@ warn_unused_configs = true
 ignore_missing_imports = false
 show_error_codes = true
 pretty = true
+plugins = ["pydantic.mypy"]
 # On contraint l'analyse aux chemins passés en CLI (src/ et tests/).
 # Évite de scanner du legacy hors périmètre.
 
