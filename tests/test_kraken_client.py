@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import json
 from typing import Any, Dict
 
 import httpx
 import pytest
 
 from dia_core.kraken.client import KrakenClient
-from dia_core.kraken.errors import AuthError, ConnectivityError, RateLimitError
+from dia_core.kraken.errors import AuthError, RateLimitError
 
 
 def _transport_with_sequence(responses: list[httpx.Response]) -> httpx.MockTransport:
