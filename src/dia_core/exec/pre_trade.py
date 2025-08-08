@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dia_core.kraken.types import OrderIntent
-from dia_core.risk.validator import validate_order, RiskLimits, ValidationResult
+from dia_core.risk.validator import validate_order, ValidationResult
+from dia_core.risk.limits import RiskLimits
 
 
 def pre_trade_checks(
