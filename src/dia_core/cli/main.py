@@ -16,7 +16,7 @@ from dia_core.portfolio import journal
 from dotenv import load_dotenv
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> int:
     # Charger .env (clés API)
     load_dotenv()
 
@@ -35,7 +35,7 @@ def main() -> None:
 
     if args.version:
         print("DIA-Core V1.0.0a1")
-        return
+        return 0
 
     logging.getLogger(__name__).info(
         "DIA-Core démarré",
@@ -101,7 +101,8 @@ def main() -> None:
 
     # Afficher résultat
     print(result.model_dump())
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
