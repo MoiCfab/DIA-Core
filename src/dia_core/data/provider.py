@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 def ohlc_dataframe(result: Dict[str, Any], pair: str) -> pd.DataFrame:
-    key = list(result.keys())[0]
+    key = next(iter(result.keys()), None)
+    if key is None:
+        raise ValueError("OHLC result dict is vide")
     rows = result[key]
     cols = ["time", "open", "high", "low", "close", "vwap", "volume", "count"]
     df = pd.DataFrame(rows, columns=cols)

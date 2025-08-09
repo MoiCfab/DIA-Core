@@ -53,10 +53,10 @@ def main() -> None:
         recipients=["fabiengrolier.17@example.com"],
     )
     alerter = EmailAlerter(email_cfg)
-    try:
-        alerter.send("[DIA-Core] Démarré", "Le bot vient de se lancer.")
-    except Exception as e:
-        logging.getLogger(__name__).warning("Email non envoyé: %s", e)
+
+    if not alerter.try_send("[DIA-Core] Démarré", "Le bot vient de se lancer."):
+        # Optionnel : prendre une autre action si l’alerte email a échoué
+        pass
 
     # Initialiser KrakenClient
     client = KrakenClient()

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 import smtplib
 import ssl
 from dataclasses import dataclass
@@ -65,7 +66,17 @@ class EmailAlerter:
                     s.login(self.cfg.username, self.cfg.password)
                 s.send_message(msg)
 
-    def send_test(self) -> None:
-        subject = "[DIA-Core] Test d'alerte email"
-        body = "Ceci est un email de test envoyé par DIA-Core pour vérifier la configuration SMTP."
-        self.send(subject, body)
+    def try_send(self, subject: str, body: str) -> bool:
+        """Envoie et retourne True si succès, False si échec (loggue l'erreur)."""
+        try:
+            self.send(subject, body)
+            return True
+        except (smtplib.SMTPException, ssl.SSLError, OSError) as e:
+            logging.getLogger(__name__).warning("Email non envoyé: %s", e)
+            return False
+
+    def send_test(self) -> bool:
+        return self.try_send(
+            "[DIA-Core] Test d'alerte email",
+            "Ceci est un email de test envoyé par DIA-Core pour vérifier la configuration SMTP.",
+        )
