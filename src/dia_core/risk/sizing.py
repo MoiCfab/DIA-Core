@@ -1,51 +1,62 @@
 from __future__ import annotations
-
+from dataclasses import dataclass
 from typing import Final
-
 
 def _round_decimals(value: float, decimals: int) -> float:
     q: float = 10.0**decimals
     return int(value * q) / q
 
+@dataclass(frozen=True)
+class SizingParams:
+    equity: float
+    price: float
+    atr: float
+    risk_per_trade_pct: float
+    k_atr: float
+    min_qty: float
+    min_notional: float
+    qty_decimals: int
 
+def compute_position_size_params(p: SizingParams) -> float:
+    """Version groupée (V3) — préférée."""
+    small: Final[float] = 1e-12
+    if p.price <= 0 or p.atr <= 0 or p.equity <= 0:
+        return 0.0
+    risk_amount = p.equity * (p.risk_per_trade_pct / 100.0)
+    stop_value = p.k_atr * p.atr
+    if stop_value <= small:
+        return 0.0
+    qty_raw = (risk_amount / stop_value) / p.price
+    qty = max(qty_raw, p.min_qty)
+    notionnel = qty * p.price
+    if notionnel < p.min_notional:
+        qty = p.min_notional / p.price
+    qty = _round_decimals(qty, p.qty_decimals)
+    if qty < p.min_qty:
+        qty = p.min_qty
+    return max(qty, 0.0)
+
+# Wrapper compat si tu as encore quelques appels anciens
 def compute_position_size(
     *,
     equity: float,
     price: float,
-    atr: float,  # mesure de volatilité (ex: ATR)
-    risk_per_trade_pct: float,  # ex: 0.5 (%)
-    k_atr: float,  # multiplicateur d'ATR pour le stop (ex: 2.0)
+    atr: float,
+    risk_per_trade_pct: float,
+    k_atr: float,
     min_qty: float,
     min_notional: float,
     qty_decimals: int,
 ) -> float:
-    """
-    Calcule une taille de position vol-aware:
-    - Montant risqué = equity * (risk_per_trade_pct / 100)
-    - Stop_value = k_atr * atr
-    - qty_raw = (montant_risqué / stop_value) / price
-    - Respect de min_qty, min_notional et décimales
-    """
-    small: Final[float] = 1e-12
-    if price <= 0 or atr <= 0 or equity <= 0:
-        return 0.0
-
-    risk_amount = equity * (risk_per_trade_pct / 100.0)
-    stop_value = k_atr * atr
-    if stop_value <= small:
-        return 0.0
-
-    qty_raw = (risk_amount / stop_value) / price
-    qty = max(qty_raw, min_qty)
-
-    # Respect du min_notional
-    notionnel = qty * price
-    if notionnel < min_notional:
-        qty = min_notional / price
-
-    # Arrondi aux décimales permises par l'exchange
-    qty = _round_decimals(qty, qty_decimals)
-    if qty < min_qty:
-        qty = min_qty
-
-    return max(qty, 0.0)
+    return compute_position_size_params(
+        SizingParams(
+            equity=equity,
+            price=price,
+            atr=atr,
+            risk_per_trade_pct=risk_per_trade_pct,
+            k_atr=k_atr,
+            min_qty=min_qty,
+            min_notional=min_notional,
+            qty_decimals=qty_decimals,
+        )
+    )
