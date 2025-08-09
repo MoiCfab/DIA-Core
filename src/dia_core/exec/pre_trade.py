@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from dia_core.config.models import AppConfig
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.kraken.types import OrderIntent
-from dia_core.risk.errors import RiskLimitExceeded
+from dia_core.risk.errors import RiskLimitExceededError
 from dia_core.risk.sizing import compute_position_size
 from dia_core.risk.validator import ValidationResult, validate_order
 
@@ -76,5 +76,5 @@ def propose_order(
         orders_last_min=risk.orders_last_min,
     )
     if not res.allowed:
-        raise RiskLimitExceeded(res.reason or "Risk limit violated")
+        raise RiskLimitExceededError(res.reason or "Risk limit violated")
     return {"qty": qty, "notional": notional}
