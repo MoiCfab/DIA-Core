@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import pandas as pd
 from dia_core.data.provider import ohlc_dataframe
 
