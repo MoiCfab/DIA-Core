@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import dataclasses
 import httpx
 import pytest
 
@@ -55,11 +56,10 @@ def test_cli_runs_dry_run(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode:
     orig_init = kmod.KrakenClient.__init__
 
     def _init(self: kmod.KrakenClient, cfg: kmod.KrakenClientConfig) -> None:
-        cfg.transport = _DummyTransport()
-        orig_init(self, cfg)
+        cfg2 = dataclasses.replace(cfg, transport=_DummyTransport())
+        orig_init(self, cfg2)
 
     monkeypatch.setattr(kmod.KrakenClient, "__init__", _init)
 
-    # Lancement du CLI en mode test
-    code = main(["--config", str(cfg_path)])
+    code = main(["--config", str(cfg_path)])  # <— maintenant main accepte argv et renvoie int
     assert code == 0

@@ -25,7 +25,7 @@ def main(argv: list[str] | None = None) -> int:
         "--config", default="config.json", help="Chemin vers le fichier de configuration"
     )
     parser.add_argument("--version", action="store_true", help="Afficher la version et quitter")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # Charger configuration JSON
     cfg = load_config(args.config)
