@@ -5,7 +5,7 @@ from dia_core.config.models import AppConfig, ExchangeMeta, RiskLimits
 from dia_core.exec.pre_trade import MarketSnapshot, propose_order
 from dia_core.risk.dynamic_fake import build_risk_context
 from dia_core.risk.errors import RiskLimitExceededError
-from dia_core.risk.sizing import compute_position_size
+from dia_core.risk.sizing import compute_position_size, SizingParams
 from dia_core.risk.validator import validate_order
 
 
@@ -38,16 +38,36 @@ def _cfg() -> AppConfig:
 def test_sizing_min_qty_notional_respected() -> None:
     min_qty = 0.003
     min_notional = 10.0
-    qty = compute_position_size(
-        equity=1000.0,
-        price=5.0,
-        atr=0.5,
-        risk_per_trade_pct=0.5,
-        k_atr=2.0,
-        min_qty=0.003,  # > computed qty?
-        min_notional=10.0,
-        qty_decimals=3,
+    equity = 1000.0  # capital total
+    price = 200.0  # prix actuel
+    atr = 5.0  # volatilité ATR
+    k_atr = 2.0  # multiplicateur
+    cfg = AppConfig(
+        risk=RiskLimits(
+            risk_per_trade_pct=1.0,
+            max_exposure_pct=50.0,
+            max_orders_per_min=10,
+            max_daily_loss_pct=5.0,
+            max_drawdown_pct=10.0
+        ),
+        exchange=ExchangeMeta(
+            min_qty=0.001,
+            min_notional=10.0,
+            qty_decimals=3
+        )
     )
+    params = SizingParams(
+        equity=equity,
+        price=price,
+        atr=atr,
+        risk_per_trade_pct=cfg.risk.risk_per_trade_pct,
+        k_atr=k_atr,
+        min_qty=cfg.exchange.min_qty,
+        min_notional=cfg.exchange.min_notional,
+        qty_decimals=cfg.exchange.qty_decimals,
+    )
+
+    qty = compute_position_size(params)
     assert qty >= min_qty
     assert qty * 5.0 >= min_notional
 

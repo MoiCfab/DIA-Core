@@ -6,7 +6,7 @@ from dia_core.config.models import AppConfig
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.kraken.types import OrderIntent
 from dia_core.risk.errors import RiskLimitExceededError
-from dia_core.risk.sizing import compute_position_size
+from dia_core.risk.sizing import compute_position_size, SizingParams
 from dia_core.risk.validator import ValidationResult, validate_order
 
 
@@ -54,7 +54,7 @@ def propose_order(
     market: MarketSnapshot,
     risk: RiskContext,
 ) -> dict[str, float]:
-    qty = compute_position_size(
+    params = SizingParams(
         equity=risk.equity,
         price=market.price,
         atr=market.atr,
@@ -64,7 +64,10 @@ def propose_order(
         min_notional=cfg.exchange.min_notional,
         qty_decimals=cfg.exchange.qty_decimals,
     )
+
+    qty = compute_position_size(params)
     notional = qty * market.price
+
     projected_exposure_pct = risk.current_exposure_pct + (notional / risk.equity) * 100.0
 
     res = validate_order(
@@ -72,9 +75,10 @@ def propose_order(
         current_exposure_pct=risk.current_exposure_pct,
         projected_exposure_pct=projected_exposure_pct,
         daily_loss_pct=0.0,  # TODO: brancher métrique réelle
-        drawdown_pct=0.0,  # TODO: idem
+        drawdown_pct=0.0,    # TODO: idem
         orders_last_min=risk.orders_last_min,
     )
     if not res.allowed:
         raise RiskLimitExceededError(res.reason or "Risk limit violated")
+
     return {"qty": qty, "notional": notional}
