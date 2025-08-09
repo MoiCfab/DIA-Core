@@ -6,7 +6,7 @@ from typing import Sequence
 try:
     import psutil  # type: ignore
 except Exception:  # fail soft si non installé
-    psutil = None  
+    psutil = None
 
 
 @dataclass
