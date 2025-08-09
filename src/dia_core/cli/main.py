@@ -1,4 +1,5 @@
 from __future__ import annotations
+import os
 import argparse
 import logging
 import time
@@ -12,8 +13,32 @@ from dia_core.kraken.types import OrderIntent
 from dia_core.portfolio import journal
 from dia_core.data.provider import load_ohlc_window
 
+from dia_core.alerts.email_alerts import EmailAlerter, EmailConfig
+from dia_core.orchestrator.overload_guard import OverloadGuard
+
 
 def main() -> None:
+    # 1) Config email (ex: via .env lus par ta couche config)
+    email_cfg = EmailConfig(
+        smtp_host="smtp.gmail.com",
+        smtp_port=587,  # STARTTLS
+        username="fabienmaison.fg@gmail.com",
+        password=os.getenv("GMAIL_KEY"),  # récupéré depuis .env
+        use_tls=True,
+        sender="fabienmaison.fg@gmail.com",  # doit matcher le compte Gmail
+        recipients=["fabiengrolier.17@example.com"],
+    )
+    alerter = EmailAlerter(email_cfg)
+    # 2) Garde-fou
+    guard = OverloadGuard(alerter)
+    # 3) Boucle: après chaque cycle, mesurer la latence moyenne du cycle stratégie
+    active_pairs = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "EUR/USD", "GBP/USD"]
+    low_priority = ["GBP/USD", "EUR/USD", "SOL/USDT"]  # ordre: à couper en premier
+
+    avg_cycle_latency_ms = 0.0  # <- mesure fournie par ta boucle
+    active_pairs = guard.tick(active_pairs, low_priority, avg_cycle_latency_ms)
+
+
     parser = argparse.ArgumentParser(prog="dia-core")
     parser.add_argument(
         "--config", default="config.json", help="Chemin vers le fichier de configuration"
