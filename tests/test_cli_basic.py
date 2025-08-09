@@ -54,7 +54,7 @@ def test_cli_runs_dry_run(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode:
 
     orig_init = kmod.KrakenClient.__init__
 
-    def _init(self, cfg):
+    def _init(self: kmod.KrakenClient, cfg: kmod.KrakenClientConfig) -> None:
         cfg.transport = _DummyTransport()
         orig_init(self, cfg)
 
