@@ -71,7 +71,7 @@ def test_sizing_min_qty_notional_respected() -> None:
 
     qty = compute_position_size(params)
     assert qty >= min_qty
-    assert qty * 5.0 >= min_notional
+    assert qty * price >= min_notional
 
 
 def test_validator_blocks_on_exposure() -> None:
@@ -98,7 +98,9 @@ def test_pre_trade_blocks_when_limits_violated() -> None:
     # Projection: current 50% + nouveau > 0 -> blocage
     try:
         market = MarketSnapshot(price=price, atr=atr, k_atr=2.0)
-        risk = build_risk_context(equity=equity, open_notional=0.0, fallback_orders_last_min=0)
+        risk = build_risk_context(
+            equity=equity, open_notional=0.5 * equity, fallback_orders_last_min=0
+        )
         propose_order(cfg=cfg, market=market, risk=risk)
         pytest.fail("Doit lever RiskLimitExceeded")
     except RiskLimitExceededError:
