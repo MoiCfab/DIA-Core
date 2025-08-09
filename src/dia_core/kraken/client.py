@@ -1,3 +1,4 @@
+# src/dia_core/kraken/client.py
 from __future__ import annotations
 
 import base64

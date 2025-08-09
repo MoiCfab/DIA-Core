@@ -2,9 +2,9 @@ from __future__ import annotations
 import logging
 import smtplib
 import ssl
+from collections.abc import Iterable
 from dataclasses import dataclass
 from email.message import EmailMessage
-from typing import Iterable
 
 
 @dataclass

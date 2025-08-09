@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import logging
+from typing import Any
+
 import pandas as pd
-from typing import Any, Dict
-from dia_core.kraken.client import KrakenClient
 from dia_core.data.cache import load_cached, save_cache
+from dia_core.kraken.client import KrakenClient
 
 logger = logging.getLogger(__name__)
 

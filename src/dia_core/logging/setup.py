@@ -3,20 +3,20 @@ from __future__ import annotations
 import gzip
 import json
 import logging
+from datetime import UTC, datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Any, Dict, Optional
-from datetime import datetime, timezone
+from typing import Any
 
 
 class _TradeIdFilter(logging.Filter):
     """Injecte un trade_id dans chaque record (si fourni)."""
 
-    def __init__(self, trade_id: Optional[str]) -> None:
+    def __init__(self, trade_id: str | None) -> None:
         super().__init__()
         self._trade_id = trade_id
 
-    def filter(self, record: logging.LogRecord) -> bool:  # noqa: D401
+    def filter(self, record: logging.LogRecord) -> bool:
         # Ajoute l'attribut si absent
         if not hasattr(record, "trade_id"):
             record.trade_id = self._trade_id
@@ -26,9 +26,9 @@ class _TradeIdFilter(logging.Filter):
 class _JsonFormatter(logging.Formatter):
     """Formatter JSON minimal et stable."""
 
-    def format(self, record: logging.LogRecord) -> str:  # noqa: D401
-        payload: Dict[str, Any] = {
-            "ts": datetime.now(timezone.utc).isoformat(),
+    def format(self, record: logging.LogRecord) -> str:
+        payload: dict[str, Any] = {
+            "ts": datetime.now(UTC).isoformat(),
             "level": record.levelname,
             "name": record.name,
             "msg": record.getMessage(),
@@ -57,7 +57,7 @@ def _gz_namer(name: str) -> str:
 def setup_logging(
     log_dir: str,
     level: str = "INFO",
-    trade_id: Optional[str] = None,
+    trade_id: str | None = None,
     filename: str = "app.log",
 ) -> logging.Logger:
     """
@@ -98,5 +98,5 @@ def setup_logging(
     logger.propagate = False  # évite les doublons vers le root
 
     # Flag interne pour éviter reconfiguration
-    setattr(logger, "_configured", True)
+    logger._configured = True
     return logger

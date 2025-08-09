@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 import httpx
 import pytest
-
 from dia_core.kraken.client import KrakenClient
 from dia_core.kraken.errors import AuthError, RateLimitError
 
@@ -23,7 +22,7 @@ def _transport_with_sequence(responses: list[httpx.Response]) -> httpx.MockTrans
 
 
 def test_get_ohlc_success() -> None:
-    payload: Dict[str, Any] = {"error": [], "result": {"XXBTZEUR": [[1, 2, 3]]}}
+    payload: dict[str, Any] = {"error": [], "result": {"XXBTZEUR": [[1, 2, 3]]}}
     transport = _transport_with_sequence([httpx.Response(200, json=payload)])
     client = KrakenClient(dry_run=True, transport=transport)
     out = client.get_ohlc("XXBTZEUR", 1)
@@ -32,7 +31,7 @@ def test_get_ohlc_success() -> None:
 
 
 def test_retry_on_5xx() -> None:
-    ok_payload: Dict[str, Any] = {"error": [], "result": {"XXBTZEUR": [[1]]}}
+    ok_payload: dict[str, Any] = {"error": [], "result": {"XXBTZEUR": [[1]]}}
     transport = _transport_with_sequence(
         [
             httpx.Response(502),  # 1er essai -> 5xx

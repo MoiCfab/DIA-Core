@@ -1,8 +1,9 @@
 from __future__ import annotations
-import sqlite3
+
 import os
+import sqlite3
 import time
-from typing import Dict, Any
+from typing import Any
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS orders (
@@ -41,7 +42,7 @@ def open_db(path: str) -> sqlite3.Connection:
     return conn
 
 
-def insert_order(conn: sqlite3.Connection, row: Dict[str, Any]) -> None:
+def insert_order(conn: sqlite3.Connection, row: dict[str, Any]) -> None:
     conn.execute(
         "INSERT OR REPLACE INTO orders(id, ts, symbol, side, type, qty, price, status, reason) VALUES(?,?,?,?,?,?,?,?,?)",
         (
