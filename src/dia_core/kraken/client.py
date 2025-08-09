@@ -58,7 +58,7 @@ class KrakenClient:
     def close(self) -> None:
         self._client.close()
 
-    def __enter__(self) -> "KrakenClient":
+    def __enter__(self) -> KrakenClient:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool:
