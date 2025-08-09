@@ -69,6 +69,8 @@ def setup_logging(
     Path(log_dir).mkdir(parents=True, exist_ok=True)
     logfile = Path(log_dir) / filename
 
+    logfile.touch(exist_ok=True)
+
     handler = RotatingFileHandler(
         filename=str(logfile),
         maxBytes=5 * 1024 * 1024,
