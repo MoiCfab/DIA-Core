@@ -1,10 +1,13 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Final
+
 
 def _round_decimals(value: float, decimals: int) -> float:
     q: float = 10.0**decimals
     return int(value * q) / q
+
 
 @dataclass(frozen=True)
 class SizingParams:
@@ -16,6 +19,7 @@ class SizingParams:
     min_qty: float
     min_notional: float
     qty_decimals: int
+
 
 def compute_position_size_params(p: SizingParams) -> float:
     """Version groupée (V3) — préférée."""
@@ -35,6 +39,7 @@ def compute_position_size_params(p: SizingParams) -> float:
     if qty < p.min_qty:
         qty = p.min_qty
     return max(qty, 0.0)
+
 
 # Wrapper compat si tu as encore quelques appels anciens
 def compute_position_size(

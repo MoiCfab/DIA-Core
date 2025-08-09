@@ -1,11 +1,15 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
+
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from pydantic import BaseModel
+
 
 class ValidationResult(BaseModel):
     allowed: bool
     reason: str | None = None
+
 
 @dataclass(frozen=True)
 class OrderMetrics:
@@ -14,6 +18,7 @@ class OrderMetrics:
     daily_loss_pct: float
     drawdown_pct: float
     orders_last_min: int
+
 
 def validate_order_params(limits: ConfigRiskLimits, m: OrderMetrics) -> ValidationResult:
     if m.projected_exposure_pct > limits.max_exposure_pct:
@@ -28,27 +33,21 @@ def validate_order_params(limits: ConfigRiskLimits, m: OrderMetrics) -> Validati
         return ValidationResult(
             allowed=False,
             reason=(
-                f"max_daily_loss_pct {m.daily_loss_pct:.2f}% > "
-                f"{limits.max_daily_loss_pct:.2f}%"
+                f"max_daily_loss_pct {m.daily_loss_pct:.2f}% > " f"{limits.max_daily_loss_pct:.2f}%"
             ),
         )
     if m.drawdown_pct > limits.max_drawdown_pct:
         return ValidationResult(
             allowed=False,
-            reason=(
-                f"max_drawdown_pct {m.drawdown_pct:.2f}% > "
-                f"{limits.max_drawdown_pct:.2f}%"
-            ),
+            reason=(f"max_drawdown_pct {m.drawdown_pct:.2f}% > " f"{limits.max_drawdown_pct:.2f}%"),
         )
     if m.orders_last_min >= limits.max_orders_per_min:
         return ValidationResult(
             allowed=False,
-            reason=(
-                f"max_orders_per_min {m.orders_last_min} >= "
-                f"{limits.max_orders_per_min}"
-            ),
+            reason=(f"max_orders_per_min {m.orders_last_min} >= " f"{limits.max_orders_per_min}"),
         )
     return ValidationResult(allowed=True)
+
 
 # Wrapper compat si nécessaire
 def validate_order(

@@ -1,11 +1,17 @@
 from __future__ import annotations
 
-import base64, hashlib, hmac, logging, time
+import base64
+import hashlib
+import hmac
+import logging
+import time
 from dataclasses import dataclass
 from types import TracebackType
 from typing import Any, Literal
 from urllib.parse import urlencode
+
 import httpx
+
 from .errors import AuthError, ConnectivityError, OrderRejectedError, RateLimitError
 
 logger = logging.getLogger("dia_core.kraken")
@@ -16,12 +22,14 @@ HTTP_FORBIDDEN = 403
 HTTP_SERVER_MIN = 500
 HTTP_SERVER_MAX = 600  # exclusif
 
+
 def _sign(path: str, data: dict[str, Any], secret: str) -> str:
     postdata = urlencode(data or {}, doseq=True)
     sha = hashlib.sha256((str(data.get("nonce", "")) + postdata).encode()).digest()
     msg = path.encode() + sha
     mac = hmac.new(base64.b64decode(secret), msg, hashlib.sha512)
     return base64.b64encode(mac.digest()).decode()
+
 
 @dataclass(frozen=True)
 class KrakenClientConfig:
@@ -32,12 +40,14 @@ class KrakenClientConfig:
     timeout_s: float = 10.0
     transport: httpx.BaseTransport | None = None  # tests
 
+
 @dataclass(frozen=True)
 class RequestOpts:
     params: dict[str, Any] | None = None
     data: dict[str, Any] | None = None
     private: bool = False
     max_attempts: int = 3
+
 
 class KrakenClient:
     def __init__(self, cfg: KrakenClientConfig) -> None:
@@ -55,7 +65,7 @@ class KrakenClient:
     def close(self) -> None:
         self._client.close()
 
-    def __enter__(self) -> "KrakenClient":
+    def __enter__(self) -> KrakenClient:
         return self
 
     def __exit__(
@@ -126,4 +136,6 @@ class KrakenClient:
             fake_tx = f"DIA-DRYRUN-{int(time.time() * 1000)}"
             logger.info("Dry-run AddOrder", extra={"extra": {"txid": fake_tx}})
             return {"result": {"txid": [fake_tx]}}
-        return self._request("POST", "/0/private/AddOrder", opts=RequestOpts(data=data, private=True))
+        return self._request(
+            "POST", "/0/private/AddOrder", opts=RequestOpts(data=data, private=True)
+        )
