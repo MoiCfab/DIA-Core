@@ -17,18 +17,8 @@ from dia_core.alerts.email_alerts import EmailAlerter, EmailConfig
 
 
 def main() -> None:
-    # 1) Config email (ex: via .env lus par ta couche config)
-    email_cfg = EmailConfig(
-        smtp_host="smtp.gmail.com",
-        smtp_port=587,  # STARTTLS
-        username="fabienmaison.fg@gmail.com",
-        password=os.getenv("GMAIL_KEY"),  # récupéré depuis .env
-        use_tls=True,
-        sender="fabienmaison.fg@gmail.com",  # doit matcher le compte Gmail
-        recipients=["fabiengrolier.17@example.com"],
-    )
-    alerter = EmailAlerter(email_cfg)
-    alerter.send_test()
+    # Charger .env (clés API)
+    load_dotenv()
 
     parser = argparse.ArgumentParser(prog="dia-core")
     parser.add_argument(
@@ -37,23 +27,36 @@ def main() -> None:
     parser.add_argument("--version", action="store_true", help="Afficher la version et quitter")
     args = parser.parse_args()
 
-    if args.version:
-        print("DIA-Core V1.0.0a1")
-        return
-
-    # Charger .env (clés API)
-    load_dotenv()
-
     # Charger configuration JSON
     cfg = load_config(args.config)
 
     # Initialiser logging structuré
     setup_logging(cfg.log_dir, level="INFO")
 
+    if args.version:
+        print("DIA-Core V1.0.0a1")
+        return
+
     logging.getLogger(__name__).info(
         "DIA-Core démarré",
         extra={"component": "cli", "mode": cfg.mode, "pair": cfg.pair},
     )
+
+    # 1) Email
+    email_cfg = EmailConfig(
+        smtp_host="smtp.gmail.com",
+        smtp_port=587,
+        username="fabienmaison.fg@gmail.com",
+        password=os.getenv("GMAIL_KEY"),
+        use_tls=True,
+        sender="fabienmaison.fg@gmail.com",
+        recipients=["fabiengrolier.17@example.com"],
+    )
+    alerter = EmailAlerter(email_cfg)
+    try:
+        alerter.send("[DIA-Core] Démarré", "Le bot vient de se lancer.")
+    except Exception as e:
+        logging.getLogger(__name__).warning("Email non envoyé: %s", e)
 
     # Initialiser KrakenClient
     client = KrakenClient()
