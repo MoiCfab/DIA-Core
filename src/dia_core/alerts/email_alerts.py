@@ -47,7 +47,9 @@ class EmailAlerter:
         context = ssl.create_default_context()
 
         if self.cfg.use_tls:  # 587 STARTTLS (Gmail)
-            with smtplib.SMTP(self.cfg.smtp_host, self.cfg.smtp_port, timeout=self.cfg.timeout) as s:
+            with smtplib.SMTP(
+                self.cfg.smtp_host, self.cfg.smtp_port, timeout=self.cfg.timeout
+            ) as s:
                 s.ehlo()
                 s.starttls(context=context)
                 s.ehlo()
@@ -56,8 +58,9 @@ class EmailAlerter:
                 s.send_message(msg)
         else:
             # SSL direct (ex: Gmail 465)
-            with smtplib.SMTP_SSL(self.cfg.smtp_host, self.cfg.smtp_port, context=context,
-                                  timeout=self.cfg.timeout) as s:
+            with smtplib.SMTP_SSL(
+                self.cfg.smtp_host, self.cfg.smtp_port, context=context, timeout=self.cfg.timeout
+            ) as s:
                 if self.cfg.username and self.cfg.password:
                     s.login(self.cfg.username, self.cfg.password)
                 s.send_message(msg)

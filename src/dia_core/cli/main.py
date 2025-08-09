@@ -38,7 +38,6 @@ def main() -> None:
     avg_cycle_latency_ms = 0.0  # <- mesure fournie par ta boucle
     active_pairs = guard.tick(active_pairs, low_priority, avg_cycle_latency_ms)
 
-
     parser = argparse.ArgumentParser(prog="dia-core")
     parser.add_argument(
         "--config", default="config.json", help="Chemin vers le fichier de configuration"
