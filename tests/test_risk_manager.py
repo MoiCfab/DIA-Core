@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from dia_core.config.models import AppConfig, ExchangeMeta, RiskLimits
 from dia_core.exec.pre_trade import propose_order
 from dia_core.risk.errors import RiskLimitExceeded

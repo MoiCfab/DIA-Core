@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 import pandas as pd
 from dia_core.data.cache import load_cached, save_cache
@@ -10,7 +10,7 @@ from dia_core.kraken.client import KrakenClient
 logger = logging.getLogger(__name__)
 
 
-def ohlc_dataframe(result: Dict[str, Any], pair: str) -> pd.DataFrame:
+def ohlc_dataframe(result: dict[str, Any], pair: str) -> pd.DataFrame:
     key = next(iter(result.keys()), None)
     if key is None:
         raise ValueError("OHLC result dict is vide")

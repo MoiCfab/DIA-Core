@@ -1,12 +1,11 @@
 from __future__ import annotations
 
+import contextlib
+import logging
 from collections.abc import Sequence
 
 from dia_core.alerts.email_alerts import EmailAlerter
 from dia_core.monitor.health_monitor import HealthMonitor, Thresholds
-
-import contextlib
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ class OverloadGuard:
         with contextlib.suppress(Exception):
             try:
                 self.alerter.send(subject, body)
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 logger.warning("Alerte email échouée: %s", err)
                 raise
         return new_list
