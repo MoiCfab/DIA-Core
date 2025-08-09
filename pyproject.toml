@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=68", "wheel", "setuptools_scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
@@ -11,22 +11,28 @@ preview = true
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-
-# On appelle ruff uniquement sur src/ et tests/ dans la CI et localement,
-# donc pas besoin d'exclusions complexes ici. (Pas de blocage sur legacy.)
+select = ["E","F","W","C90","I","N","UP","B","A","S","BLE","DTZ","PIE","PL","PT","RUF","SIM"]
+ignore = []
+fix = true
+show-fixes = true
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
 warn_unused_configs = true
-ignore_missing_imports = false
+warn_redundant_casts = true
+warn_return_any = true
+no_implicit_optional = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_reexport = true
 show_error_codes = true
 pretty = true
 plugins = ["pydantic.mypy"]
-# On contraint l'analyse aux chemins passés en CLI (src/ et tests/).
-# Évite de scanner du legacy hors périmètre.
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q -ra --strict-markers --maxfail=1 --durations=10 --disable-warnings"
 pythonpath = ["src"]
