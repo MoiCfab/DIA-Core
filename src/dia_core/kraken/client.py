@@ -5,20 +5,21 @@ import hashlib
 import hmac
 import logging
 import time
-from typing import Any, Dict, Optional
+from dataclasses import dataclass
+from typing import Any, Dict
 from urllib.parse import urlencode
 
 import httpx
 
 from .errors import AuthError, ConnectivityError, OrderRejected, RateLimitError
 
-Logger = logging.getLoggerClass()
 logger = logging.getLogger("dia_core.kraken")
 
 
 def _sign(path: str, data: Dict[str, Any], secret: str) -> str:
-    # Kraken signature: base64(hmac_sha512(sha256(nonce+postdata) + path, secret))
-    # Pour nos tests unitaires, le détail exact n'est pas utilisé; implémentation conforme.
+    """
+    Kraken signature: base64(hmac_sha512(sha256(nonce+postdata) + path, secret))
+    """
     postdata = urlencode(data or {}, doseq=True)
     sha = hashlib.sha256((str(data.get("nonce", "")) + postdata).encode()).digest()
     msg = path.encode() + sha
@@ -26,26 +27,53 @@ def _sign(path: str, data: Dict[str, Any], secret: str) -> str:
     return base64.b64encode(mac.digest()).decode()
 
 
+# NEW: regroupe les paramètres pour éviter PLR0913
+@dataclass(frozen=True)
+class KrakenClientConfig:
+    base_url: str = "https://api.kraken.com"
+    key: str | None = None
+    secret: str | None = None
+    dry_run: bool = True
+    timeout_s: float = 10.0
+    transport: httpx.BaseTransport | None = None  # pour tests
+
+
 class KrakenClient:
-    def __init__(
-        self,
-        base_url: str = "https://api.kraken.com",
-        *,
-        key: Optional[str] = None,
-        secret: Optional[str] = None,
-        dry_run: bool = True,
-        timeout_s: float = 10.0,
-        transport: httpx.BaseTransport | None = None,  # pour tests
-    ) -> None:
-        self.base_url = base_url.rstrip("/")
-        self.key = key
-        self.secret = secret
-        self.dry_run = dry_run
+    def __init__(self, cfg: KrakenClientConfig) -> None:
+        self.base_url = cfg.base_url.rstrip("/")
+        self.key = cfg.key
+        self.secret = cfg.secret
+        self.dry_run = cfg.dry_run
         self._client = httpx.Client(
             base_url=self.base_url,
-            timeout=httpx.Timeout(timeout_s),
-            transport=transport,
+            timeout=httpx.Timeout(cfg.timeout_s),
+            transport=cfg.transport,
             headers={"User-Agent": "DIA-Core/kraken"},
+        )
+
+    @classmethod
+    def from_args(
+        cls,
+        base_url: str = "https://api.kraken.com",
+        *,
+        key: str | None = None,
+        secret: str | None = None,
+        dry_run: bool = True,
+        timeout_s: float = 10.0,
+        transport: httpx.BaseTransport | None = None,
+    ) -> "KrakenClient":
+        """
+        Compat pratique pour ne pas toucher tous les appelants tout de suite.
+        """
+        return cls(
+            KrakenClientConfig(
+                base_url=base_url,
+                key=key,
+                secret=secret,
+                dry_run=dry_run,
+                timeout_s=timeout_s,
+                transport=transport,
+            )
         )
 
     def close(self) -> None:
@@ -70,16 +98,12 @@ class KrakenClient:
         if private:
             if not self.key or not self.secret:
                 raise AuthError("Kraken API key/secret not configured")
-            assert self.secret is not None
             data = dict(data or {})
             data.setdefault("nonce", int(time.time() * 1000))
             headers["API-Key"] = self.key
-            headers["API-Sign"] = _sign(path, data, self.secret)
+            headers["API-Sign"] = _sign(path, data, self.secret)  # type: ignore[arg-type]
             body = urlencode(data, doseq=True).encode()
-        else:
-            body = None
 
-        # Boucle de retries simple: erreurs réseau et 5xx
         backoff = 0.5
         last_exc: Exception | None = None
         for attempt in range(1, max_attempts + 1):
