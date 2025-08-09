@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from dia_core.config.models import AppConfig
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.kraken.types import OrderIntent
-from dia_core.risk.errors import RiskLimitExceededError
 from dia_core.risk.sizing import SizingParams, compute_position_size
 from dia_core.risk.validator import RiskCheckParams, validate_order
 

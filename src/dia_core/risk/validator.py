@@ -24,7 +24,8 @@ class RiskCheckParams:
 def validate_order(limits: ConfigRiskLimits, params: RiskCheckParams) -> None:
     if params.projected_exposure_pct > limits.max_exposure_pct:
         raise RiskLimitExceededError(
-            f"max_exposure_pct {params.projected_exposure_pct:.2f}% > {limits.max_exposure_pct:.2f}%"
+            f"max_exposure_pct {params.projected_exposure_pct:.2f}% "
+            f"> {limits.max_exposure_pct:.2f}%"
         )
     if params.daily_loss_pct > limits.max_daily_loss_pct:
         raise RiskLimitExceededError(
