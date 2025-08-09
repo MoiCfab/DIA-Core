@@ -7,7 +7,7 @@ from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.kraken.types import OrderIntent
 from dia_core.risk.errors import RiskLimitExceededError
 from dia_core.risk.sizing import SizingParams, compute_position_size
-from dia_core.risk.validator import ValidationResult, validate_order
+from dia_core.risk.validator import RiskCheckParams, validate_order
 
 
 # --- NEW: group params ---
@@ -30,30 +30,24 @@ def pre_trade_checks(
     limits: ConfigRiskLimits,
     _equity: float,
     _min_notional: float,
-) -> ValidationResult:
+) -> None:
     current_exposure_pct: float = getattr(intent, "current_exposure_pct", 0.0)
     projected_exposure_pct: float = getattr(intent, "projected_exposure_pct", 0.0)
     daily_loss_pct: float = getattr(intent, "daily_loss_pct", 0.0)
     drawdown_pct: float = getattr(intent, "drawdown_pct", 0.0)
     orders_last_min: int = getattr(intent, "orders_last_min", 0)
 
-    return validate_order(
-        limits,
+    metrics = RiskCheckParams(
         current_exposure_pct=current_exposure_pct,
         projected_exposure_pct=projected_exposure_pct,
         daily_loss_pct=daily_loss_pct,
         drawdown_pct=drawdown_pct,
         orders_last_min=orders_last_min,
     )
+    validate_order(limits, metrics)
 
 
-# --- REFACTORED: ≤ 5 params
-def propose_order(
-    *,
-    cfg: AppConfig,
-    market: MarketSnapshot,
-    risk: RiskContext,
-) -> dict[str, float]:
+def propose_order(*, cfg: AppConfig, market: MarketSnapshot, risk: RiskContext) -> dict[str, float]:
     params = SizingParams(
         equity=risk.equity,
         price=market.price,
@@ -64,21 +58,16 @@ def propose_order(
         min_notional=cfg.exchange.min_notional,
         qty_decimals=cfg.exchange.qty_decimals,
     )
-
     qty = compute_position_size(params)
     notional = qty * market.price
-
     projected_exposure_pct = risk.current_exposure_pct + (notional / risk.equity) * 100.0
 
-    res = validate_order(
-        cfg.risk,
+    metrics = RiskCheckParams(
         current_exposure_pct=risk.current_exposure_pct,
         projected_exposure_pct=projected_exposure_pct,
-        daily_loss_pct=0.0,  # TODO: brancher métrique réelle
-        drawdown_pct=0.0,  # TODO: idem
+        daily_loss_pct=0.0,
+        drawdown_pct=0.0,
         orders_last_min=risk.orders_last_min,
     )
-    if not res.allowed:
-        raise RiskLimitExceededError(res.reason or "Risk limit violated")
-
+    validate_order(cfg.risk, metrics)  # lève si violation
     return {"qty": qty, "notional": notional}

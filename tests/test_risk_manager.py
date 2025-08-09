@@ -6,7 +6,7 @@ from dia_core.exec.pre_trade import MarketSnapshot, propose_order
 from dia_core.risk.dynamic_fake import build_risk_context
 from dia_core.risk.errors import RiskLimitExceededError
 from dia_core.risk.sizing import SizingParams, compute_position_size
-from dia_core.risk.validator import validate_order
+from dia_core.risk.validator import RiskCheckParams, validate_order
 
 
 def _cfg() -> AppConfig:
@@ -70,15 +70,17 @@ def test_sizing_min_qty_notional_respected() -> None:
 
 def test_validator_blocks_on_exposure() -> None:
     limits = _cfg().risk
-    res = validate_order(
-        limits,
-        current_exposure_pct=49.0,
-        projected_exposure_pct=55.0,  # dépassement
-        daily_loss_pct=0.0,
-        drawdown_pct=0.0,
-        orders_last_min=0,
-    )
-    assert not res.allowed
+    with pytest.raises(RiskLimitExceededError):
+        validate_order(
+            limits,
+            RiskCheckParams(
+                current_exposure_pct=49.0,
+                projected_exposure_pct=55.0,  # dépasse
+                daily_loss_pct=0.0,
+                drawdown_pct=0.0,
+                orders_last_min=0,
+            ),
+        )
 
 
 def test_pre_trade_blocks_when_limits_violated() -> None:

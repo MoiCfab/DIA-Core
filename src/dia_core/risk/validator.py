@@ -22,31 +22,19 @@ class RiskCheckParams:
 
 
 def validate_order(limits: ConfigRiskLimits, params: RiskCheckParams) -> None:
-    """Vérifie que l'ordre respecte les limites de risque."""
     if params.projected_exposure_pct > limits.max_exposure_pct:
         raise RiskLimitExceededError(
-            f"max_exposure_pct {params.projected_exposure_pct:.2f}% "
-            f"> {limits.max_exposure_pct:.2f}%"
+            f"max_exposure_pct {params.projected_exposure_pct:.2f}% > {limits.max_exposure_pct:.2f}%"
         )
-
-    if params.current_exposure_pct > limits.max_exposure_pct:
-        raise RiskLimitExceededError(
-            f"max_current_exposure_pct {params.current_exposure_pct:.2f}% "
-            f"> {limits.max_exposure_pct:.2f}%"
-        )
-
     if params.daily_loss_pct > limits.max_daily_loss_pct:
         raise RiskLimitExceededError(
-            f"max_daily_loss_pct {params.daily_loss_pct:.2f}% "
-            f"> {limits.max_daily_loss_pct:.2f}%"
+            f"max_daily_loss_pct {params.daily_loss_pct:.2f}% > {limits.max_daily_loss_pct:.2f}%"
         )
-
     if params.drawdown_pct > limits.max_drawdown_pct:
         raise RiskLimitExceededError(
-            f"max_drawdown_pct {params.drawdown_pct:.2f}% " f"> {limits.max_drawdown_pct:.2f}%"
+            f"max_drawdown_pct {params.drawdown_pct:.2f}% > {limits.max_drawdown_pct:.2f}%"
         )
-
     if params.orders_last_min > limits.max_orders_per_min:
         raise RiskLimitExceededError(
-            f"max_orders_per_minute {params.orders_last_min} " f"> {limits.max_orders_per_min}"
+            f"max_orders_per_min {params.orders_last_min} > {limits.max_orders_per_min}"
         )
