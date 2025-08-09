@@ -3,10 +3,10 @@ from __future__ import annotations
 import pytest
 from dia_core.config.models import AppConfig, ExchangeMeta, RiskLimits
 from dia_core.exec.pre_trade import MarketSnapshot, propose_order
+from dia_core.risk.dynamic_fake import build_risk_context
 from dia_core.risk.errors import RiskLimitExceededError
 from dia_core.risk.sizing import compute_position_size
 from dia_core.risk.validator import validate_order
-from dia_core.risk.dynamic_fake import build_risk_context
 
 
 def _cfg() -> AppConfig:
