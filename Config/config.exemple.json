@@ -1,0 +1,22 @@
+{
+  "mode": "dry_run",
+  "logging": {
+    "dir": "/var/log/dia-core",
+    "level": "INFO",
+    "filename": "app.log"
+  },
+  "exchange": {
+    "symbol": "BTC/EUR",
+    "price_decimals": 2,
+    "qty_decimals": 3,
+    "min_qty": 0.001,
+    "min_notional": 10.0
+  },
+  "risk": {
+    "risk_per_trade_pct": 1.0,
+    "max_exposure_pct": 50.0,
+    "max_orders_per_min": 10,
+    "max_daily_loss_pct": 5.0,
+    "max_drawdown_pct": 10.0
+  }
+}
