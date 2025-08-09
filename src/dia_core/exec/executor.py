@@ -38,7 +38,6 @@ class Executor:
 
     def submit(self, intent: OrderIntent, equity: float) -> SubmittedOrder:
         # Validation risque (hard-stop)
-        res = pre_trade_checks(intent, self.limits, equity, self.min_notional)
         try:
             pre_trade_checks(intent, self.limits, equity, self.min_notional)
         except RiskLimitExceededError as e:
