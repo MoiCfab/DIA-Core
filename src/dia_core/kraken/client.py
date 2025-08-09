@@ -6,7 +6,8 @@ import hmac
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any
+from types import TracebackType
+from typing import Any,Literal, Type
 from urllib.parse import urlencode
 
 import httpx
@@ -61,8 +62,13 @@ class KrakenClient:
     def __enter__(self) -> KrakenClient:
         return self
 
-    def __exit__(self, exc_type, exc, tb) -> bool:
-        self._client.close()
+    def __exit__(
+            self,
+            exc_type: Type[BaseException] | None,
+            exc: BaseException | None,
+            tb: TracebackType | None,
+    ) -> Literal[False]:
+        self.close()
         return False
 
     # ---------- Core request (args groupés) ----------

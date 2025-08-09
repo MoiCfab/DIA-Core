@@ -1,16 +1,9 @@
 from __future__ import annotations
-
-from dataclasses import dataclass
-
-from dia_core.market_state.fake import current_exposure_pct as _expo
-from dia_core.market_state.fake import orders_last_min as _olm
-
-
-@dataclass(frozen=True)
-class RiskContext:
-    equity: float
-    current_exposure_pct: float
-    orders_last_min: int
+from dia_core.exec.pre_trade import RiskContext  # <- utilise la même dataclass que propose_order
+from dia_core.market_state.fake import (
+    current_exposure_pct as _expo,
+    orders_last_min as _olm,
+)
 
 
 def build_risk_context(
