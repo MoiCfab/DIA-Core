@@ -6,7 +6,7 @@ import hmac
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 from urllib.parse import urlencode
 
 import httpx
@@ -23,13 +23,14 @@ HTTP_SERVER_MIN = 500
 HTTP_SERVER_MAX = 600  # exclusif
 
 
-def _sign(path: str, data: Dict[str, Any], secret: str) -> str:
+def _sign(path: str, data: dict[str, Any], secret: str) -> str:
     """Kraken: base64(hmac_sha512(sha256(nonce+postdata) + path, secret))."""
     postdata = urlencode(data or {}, doseq=True)
     sha = hashlib.sha256((str(data.get("nonce", "")) + postdata).encode()).digest()
     msg = path.encode() + sha
     mac = hmac.new(base64.b64decode(secret), msg, hashlib.sha512)
     return base64.b64encode(mac.digest()).decode()
+
 
 @dataclass(frozen=True)
 class KrakenClientConfig:
@@ -39,6 +40,7 @@ class KrakenClientConfig:
     dry_run: bool = True
     timeout_s: float = 10.0
     transport: httpx.BaseTransport | None = None  # tests
+
 
 class KrakenClient:
     def __init__(self, cfg: KrakenClientConfig) -> None:
@@ -59,13 +61,13 @@ class KrakenClient:
         method: str,
         path: str,
         *,
-        params: Dict[str, Any] | None = None,
-        data: Dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
         private: bool = False,
         max_attempts: int = 3,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         url = path
-        headers: Dict[str, str] = {
+        headers: dict[str, str] = {
             "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
         }
 
@@ -113,11 +115,11 @@ class KrakenClient:
         raise ConnectivityError(f"Network failure after retries: {last_exc!r}")
 
     # ---------- Endpoints utiles ----------
-    def get_ohlc(self, pair: str, interval: int = 1) -> Dict[str, Any]:
+    def get_ohlc(self, pair: str, interval: int = 1) -> dict[str, Any]:
         params = {"pair": pair, "interval": interval}
         return self._request("GET", "/0/public/OHLC", params=params, private=False)
 
-    def add_order(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def add_order(self, data: dict[str, Any]) -> dict[str, Any]:
         if self.dry_run:
             fake_tx = f"DIA-DRYRUN-{int(time.time() * 1000)}"
             logger.info("Dry-run AddOrder", extra={"extra": {"txid": fake_tx}})
