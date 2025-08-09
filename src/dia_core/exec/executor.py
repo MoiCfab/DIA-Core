@@ -8,6 +8,7 @@ from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.exec.pre_trade import pre_trade_checks
 from dia_core.kraken.client import KrakenClient
 from dia_core.kraken.types import OrderIntent, SubmittedOrder
+from dia_core.risk.errors import RiskLimitExceededError
 
 logger = logging.getLogger(__name__)
 Mode = Literal["dry_run", "paper", "live"]
@@ -38,15 +39,17 @@ class Executor:
     def submit(self, intent: OrderIntent, equity: float) -> SubmittedOrder:
         # Validation risque (hard-stop)
         res = pre_trade_checks(intent, self.limits, equity, self.min_notional)
-        if not res.allowed:
+        try:
+            pre_trade_checks(intent, self.limits, equity, self.min_notional)
+        except RiskLimitExceededError as e:
             logger.warning(
                 "Ordre refusé",
-                extra={"extra": {"component": "executor", "reason": res.reason}},
+                extra={"extra": {"component": "executor", "reason": str(e)}},
             )
             return SubmittedOrder(
                 client_order_id=str(uuid.uuid4()),
                 status="rejected",
-                reason=res.reason,
+                reason=str(e),
             )
 
         if self.mode == "dry_run":

@@ -50,7 +50,13 @@ def test_sizing_min_qty_notional_respected() -> None:
             max_daily_loss_pct=5.0,
             max_drawdown_pct=10.0,
         ),
-        exchange=ExchangeMeta(min_qty=0.001, min_notional=10.0, qty_decimals=3),
+        exchange=ExchangeMeta(
+            symbol="BTC/EUR",
+            price_decimals=2,
+            qty_decimals=3,
+            min_qty=0.001,
+            min_notional=10.0,
+        ),
     )
     params = SizingParams(
         equity=equity,
