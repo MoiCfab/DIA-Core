@@ -6,9 +6,11 @@ from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.risk.errors import RiskLimitExceededError
 from pydantic import BaseModel
 
+
 class ValidationResult(BaseModel):
     allowed: bool
     reason: str | None = None
+
 
 @dataclass(frozen=True)
 class RiskCheckParams:
