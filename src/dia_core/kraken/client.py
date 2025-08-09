@@ -103,8 +103,8 @@ class KrakenClient:
                 raise AuthError("Kraken API key/secret not configured")
             data = dict(opts.data or {})
             data.setdefault("nonce", int(time.time() * 1000))
-            headers["API-Key"] = self.key  # type: ignore[assignment]
-            headers["API-Sign"] = _sign(path, data, self.secret)  # type: ignore[arg-type]
+            headers["API-Key"] = self.key
+            headers["API-Sign"] = _sign(path, data, self.secret)
             body = urlencode(data, doseq=True).encode()
 
         backoff = 0.5
