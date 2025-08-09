@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import pytest
 from dia_core.config.models import AppConfig, ExchangeMeta, RiskLimits
-from dia_core.exec.pre_trade import propose_order
-from dia_core.risk.errors import RiskLimitExceeded
+from dia_core.exec.pre_trade import MarketSnapshot, propose_order
+from dia_core.risk.errors import RiskLimitExceededError
 from dia_core.risk.sizing import compute_position_size
 from dia_core.risk.validator import validate_order
+from dia_core.risk.dynamic_fake import build_risk_context
 
 
 def _cfg() -> AppConfig:
@@ -72,16 +73,11 @@ def test_pre_trade_blocks_when_limits_violated() -> None:
     atr = 1.0
     # Projection: current 50% + nouveau > 0 -> blocage
     try:
-        propose_order(
-            cfg=cfg,
-            equity=equity,
-            price=price,
-            atr=atr,
-            current_exposure_pct=50.0,
-            orders_last_min=0,
-        )
+        market = MarketSnapshot(price=price, atr=atr, k_atr=2.0)
+        risk = build_risk_context(equity=equity, open_notional=0.0, fallback_orders_last_min=0)
+        propose_order(cfg=cfg, market=market, risk=risk)
         pytest.fail("Doit lever RiskLimitExceeded")
-    except RiskLimitExceeded:
+    except RiskLimitExceededError:
         pass
 
 
@@ -90,13 +86,9 @@ def test_pre_trade_ok_when_within_limits() -> None:
     equity = 10000.0
     price = 100.0
     atr = 5.0  # stop plus large donc qty plus faible
-    out = propose_order(
-        cfg=cfg,
-        equity=equity,
-        price=price,
-        atr=atr,
-        current_exposure_pct=0.0,
-        orders_last_min=0,
-    )
+    market = MarketSnapshot(price=price, atr=atr, k_atr=2.0)
+    risk = build_risk_context(equity=equity, open_notional=0.0, fallback_orders_last_min=0)
+    out = propose_order(cfg=cfg, market=market, risk=risk)
+
     assert out["qty"] > 0.0
     assert out["notional"] == out["qty"] * price
