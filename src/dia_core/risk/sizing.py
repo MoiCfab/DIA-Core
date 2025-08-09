@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Final
+
 
 @dataclass(frozen=True)
 class SizingParams:
@@ -16,7 +18,7 @@ class SizingParams:
 
 def compute_position_size(params: SizingParams) -> float:
     """Calcule la taille de position en fonction des paramètres de sizing."""
-    SMALL: Final[float] = 1e-12
+    small: Final[float] = 1e-12
     if params.price <= 0 or params.atr <= 0 or params.equity <= 0:
         return 0.0
 
@@ -27,4 +29,4 @@ def compute_position_size(params: SizingParams) -> float:
     if qty * params.price < params.min_notional:
         return 0.0
 
-    return max(qty, SMALL)
+    return max(qty, small)
