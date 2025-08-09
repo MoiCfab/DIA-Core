@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from dia_core.config.models import AppConfig, ExchangeMeta, RiskLimits
 from dia_core.exec.pre_trade import propose_order
 from dia_core.risk.errors import RiskLimitExceeded
@@ -34,6 +36,8 @@ def _cfg() -> AppConfig:
 
 
 def test_sizing_min_qty_notional_respected() -> None:
+    MIN_QTY = 0.003
+    MIN_NOTIONAL = 10.0
     qty = compute_position_size(
         equity=1000.0,
         price=5.0,
@@ -44,8 +48,8 @@ def test_sizing_min_qty_notional_respected() -> None:
         min_notional=10.0,
         qty_decimals=3,
     )
-    assert qty >= 0.003
-    assert qty * 5.0 >= 10.0
+    assert qty >= MIN_QTY
+    assert qty * 5.0 >= MIN_NOTIONAL
 
 
 def test_validator_blocks_on_exposure() -> None:
@@ -77,7 +81,7 @@ def test_pre_trade_blocks_when_limits_violated() -> None:
             current_exposure_pct=50.0,
             orders_last_min=0,
         )
-        assert False, "Doit lever RiskLimitExceeded"
+        pytest.fail("Doit lever RiskLimitExceeded")
     except RiskLimitExceeded:
         pass
 

@@ -88,11 +88,8 @@ def setup_logging(
     handler.setFormatter(_JsonFormatter())
     handler.addFilter(_TradeIdFilter(trade_id))
 
-    # Si c’est un int (ex: logging.INFO), on l’utilise directement
-    if isinstance(level, int):
-        lvl_num = level
-    else:
-        lvl_num = getattr(logging, level.upper(), logging.INFO)
+    # Si c'est un int (ex: logging.INFO), on l'utilise directement
+    lvl_num = level if isinstance(level, int) else getattr(logging, level.upper(), logging.INFO)
     logger.setLevel(lvl_num)
     logger.addHandler(handler)
     logger.propagate = False  # évite les doublons vers le root

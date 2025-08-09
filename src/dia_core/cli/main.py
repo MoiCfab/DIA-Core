@@ -55,7 +55,7 @@ def main() -> None:
     alerter = EmailAlerter(email_cfg)
 
     if not alerter.try_send("[DIA-Core] Démarré", "Le bot vient de se lancer."):
-        # Optionnel : prendre une autre action si l’alerte email a échoué
+        # Optionnel : prendre une autre action si l'alerte email a échoué
         pass
 
     # Initialiser KrakenClient

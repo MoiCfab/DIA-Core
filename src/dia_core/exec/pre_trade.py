@@ -78,21 +78,3 @@ def propose_order(
     if not res.allowed:
         raise RiskLimitExceeded(res.reason or "Risk limit violated")
     return {"qty": qty, "notional": notional}
-
-
-# --- Optional: wrapper pour compat si ailleurs non modifié
-def propose_order_legacy(
-    *,
-    cfg: AppConfig,
-    equity: float,
-    price: float,
-    atr: float,
-    current_exposure_pct: float,
-    orders_last_min: int,
-    k_atr: float = 2.0,
-) -> dict[str, float]:
-    market = MarketSnapshot(price=price, atr=atr, k_atr=k_atr)
-    risk = RiskContext(
-        equity=equity, current_exposure_pct=current_exposure_pct, orders_last_min=orders_last_min
-    )
-    return propose_order(cfg=cfg, market=market, risk=risk)
