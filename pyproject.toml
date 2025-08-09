@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel", "setuptools_scm[toml]>=8"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
@@ -11,10 +11,16 @@ preview = true
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-select = ["E","F","W","C90","I","N","UP","B","A","S","BLE","DTZ","PIE","PL","PT","RUF","SIM"]
-ignore = []
 fix = true
 show-fixes = true
+
+[tool.ruff.lint]
+select = ["E","F","W","C90","I","N","UP","B","A","S","BLE","DTZ","PIE","PL","PT","RUF","SIM"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101","D"]         # assert autorisé, docstrings non obligatoires en tests
+"src/**/__init__.py" = ["F401"]   # ré-exports autorisés
 
 [tool.mypy]
 python_version = "3.11"
