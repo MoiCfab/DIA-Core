@@ -29,14 +29,7 @@ def main() -> None:
         recipients=["fabiengrolier.17@example.com"],
     )
     alerter = EmailAlerter(email_cfg)
-    # 2) Garde-fou
-    guard = OverloadGuard(alerter)
-    # 3) Boucle: après chaque cycle, mesurer la latence moyenne du cycle stratégie
-    active_pairs = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "EUR/USD", "GBP/USD"]
-    low_priority = ["GBP/USD", "EUR/USD", "SOL/USDT"]  # ordre: à couper en premier
-
-    avg_cycle_latency_ms = 0.0  # <- mesure fournie par ta boucle
-    active_pairs = guard.tick(active_pairs, low_priority, avg_cycle_latency_ms)
+    alerter.send_test()
 
     parser = argparse.ArgumentParser(prog="dia-core")
     parser.add_argument(

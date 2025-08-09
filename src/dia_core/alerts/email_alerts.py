@@ -64,3 +64,8 @@ class EmailAlerter:
                 if self.cfg.username and self.cfg.password:
                     s.login(self.cfg.username, self.cfg.password)
                 s.send_message(msg)
+
+    def send_test(self) -> None:
+        subject = "[DIA-Core] Test d'alerte email"
+        body = "Ceci est un email de test envoyé par DIA-Core pour vérifier la configuration SMTP."
+        self.send(subject, body)
