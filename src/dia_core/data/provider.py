@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 import pandas as pd
-from dia_core.data.cache import load_cached, save_cache
+from dia_core.data.cache import load_cache, save_cache
 from dia_core.kraken.client import KrakenClient
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def ohlc_dataframe(result: dict[str, Any], pair: str) -> pd.DataFrame:
 def load_ohlc_window(
     client: KrakenClient, pair: str, interval: int, window_bars: int, cache_dir: str
 ) -> pd.DataFrame:
-    df = load_cached(cache_dir, pair, interval)
+    df = load_cache(cache_dir, pair, interval)
     if df is None or len(df) < window_bars:
         logger.info("Téléchargement OHLC depuis Kraken", extra={"component": "data", "pair": pair})
         res = client.get_ohlc(pair, interval=interval)
