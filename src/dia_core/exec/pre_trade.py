@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+
 from dia_core.config.models import AppConfig
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.kraken.types import OrderIntent
@@ -16,11 +17,13 @@ class MarketSnapshot:
     atr: float
     k_atr: float = 2.0
 
+
 @dataclass(frozen=True)
 class RiskContext:
     equity: float
     current_exposure_pct: float
     orders_last_min: int
+
 
 def pre_trade_checks(
     intent: OrderIntent,
@@ -42,6 +45,7 @@ def pre_trade_checks(
         drawdown_pct=drawdown_pct,
         orders_last_min=orders_last_min,
     )
+
 
 # --- REFACTORED: ≤ 5 params
 def propose_order(
@@ -67,19 +71,28 @@ def propose_order(
         cfg.risk,
         current_exposure_pct=risk.current_exposure_pct,
         projected_exposure_pct=projected_exposure_pct,
-        daily_loss_pct=0.0,   # TODO: brancher métrique réelle
-        drawdown_pct=0.0,     # TODO: idem
+        daily_loss_pct=0.0,  # TODO: brancher métrique réelle
+        drawdown_pct=0.0,  # TODO: idem
         orders_last_min=risk.orders_last_min,
     )
     if not res.allowed:
         raise RiskLimitExceeded(res.reason or "Risk limit violated")
     return {"qty": qty, "notional": notional}
 
+
 # --- Optional: wrapper pour compat si ailleurs non modifié
 def propose_order_legacy(
-    *, cfg: AppConfig, equity: float, price: float, atr: float,
-    current_exposure_pct: float, orders_last_min: int, k_atr: float = 2.0,
+    *,
+    cfg: AppConfig,
+    equity: float,
+    price: float,
+    atr: float,
+    current_exposure_pct: float,
+    orders_last_min: int,
+    k_atr: float = 2.0,
 ) -> dict[str, float]:
     market = MarketSnapshot(price=price, atr=atr, k_atr=k_atr)
-    risk = RiskContext(equity=equity, current_exposure_pct=current_exposure_pct, orders_last_min=orders_last_min)
+    risk = RiskContext(
+        equity=equity, current_exposure_pct=current_exposure_pct, orders_last_min=orders_last_min
+    )
     return propose_order(cfg=cfg, market=market, risk=risk)
