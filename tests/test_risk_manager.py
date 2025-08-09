@@ -5,7 +5,7 @@ from dia_core.config.models import AppConfig, ExchangeMeta, RiskLimits
 from dia_core.exec.pre_trade import MarketSnapshot, propose_order
 from dia_core.risk.dynamic_fake import build_risk_context
 from dia_core.risk.errors import RiskLimitExceededError
-from dia_core.risk.sizing import compute_position_size, SizingParams
+from dia_core.risk.sizing import SizingParams, compute_position_size
 from dia_core.risk.validator import validate_order
 
 
@@ -48,13 +48,9 @@ def test_sizing_min_qty_notional_respected() -> None:
             max_exposure_pct=50.0,
             max_orders_per_min=10,
             max_daily_loss_pct=5.0,
-            max_drawdown_pct=10.0
+            max_drawdown_pct=10.0,
         ),
-        exchange=ExchangeMeta(
-            min_qty=0.001,
-            min_notional=10.0,
-            qty_decimals=3
-        )
+        exchange=ExchangeMeta(min_qty=0.001, min_notional=10.0, qty_decimals=3),
     )
     params = SizingParams(
         equity=equity,

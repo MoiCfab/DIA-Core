@@ -6,7 +6,7 @@ from dia_core.config.models import AppConfig
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.kraken.types import OrderIntent
 from dia_core.risk.errors import RiskLimitExceededError
-from dia_core.risk.sizing import compute_position_size, SizingParams
+from dia_core.risk.sizing import SizingParams, compute_position_size
 from dia_core.risk.validator import ValidationResult, validate_order
 
 
@@ -75,7 +75,7 @@ def propose_order(
         current_exposure_pct=risk.current_exposure_pct,
         projected_exposure_pct=projected_exposure_pct,
         daily_loss_pct=0.0,  # TODO: brancher métrique réelle
-        drawdown_pct=0.0,    # TODO: idem
+        drawdown_pct=0.0,  # TODO: idem
         orders_last_min=risk.orders_last_min,
     )
     if not res.allowed:
