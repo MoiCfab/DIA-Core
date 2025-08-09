@@ -14,7 +14,6 @@ from dia_core.portfolio import journal
 from dia_core.data.provider import load_ohlc_window
 
 from dia_core.alerts.email_alerts import EmailAlerter, EmailConfig
-from dia_core.orchestrator.overload_guard import OverloadGuard
 
 
 def main() -> None:
