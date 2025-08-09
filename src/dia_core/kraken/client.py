@@ -11,7 +11,7 @@ from urllib.parse import urlencode
 
 import httpx
 
-from .errors import AuthError, ConnectivityError, OrderRejected, RateLimitError
+from .errors import AuthError, ConnectivityError, OrderRejectedError, RateLimitError
 
 logger = logging.getLogger("dia_core.kraken")
 
@@ -98,7 +98,7 @@ class KrakenClient:
 
                 payload = resp.json()
                 if isinstance(payload, dict) and payload.get("error"):
-                    raise OrderRejected(str(payload["error"]))  # N818 ailleurs si tu renomme
+                    raise OrderRejectedError(str(payload["error"]))  # N818 ailleurs si tu renomme
 
                 if isinstance(payload, dict):
                     return payload

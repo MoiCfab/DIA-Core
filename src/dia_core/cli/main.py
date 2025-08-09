@@ -59,7 +59,7 @@ def main() -> None:
         pass
 
     # Initialiser KrakenClient
-    client = KrakenClient(KrakenClientConfig(dry_run=True, transport=transport))
+    client = KrakenClient(KrakenClientConfig(dry_run=True))
 
     # Charger les OHLC (par ex. intervalle 1 minute, 100 dernières bougies)
     df = load_ohlc_window(

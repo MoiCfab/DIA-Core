@@ -13,5 +13,5 @@ class AuthError(RuntimeError):
     """HTTP 401/403 ou auth invalide côté Kraken."""
 
 
-class OrderRejected(RuntimeError):
+class OrderRejectedError(RuntimeError):
     """Rejet d'ordre renvoyé par l'API (payload['error'] non vide)."""
