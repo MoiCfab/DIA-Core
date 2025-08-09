@@ -57,11 +57,17 @@ class HealthMonitor:
             self._history = self._history[-128:]
         return snap
 
-    def evaluate(self, active_pairs: Sequence[str], low_priority: Sequence[str]) -> OverloadDecision:
+    def evaluate(
+        self, active_pairs: Sequence[str], low_priority: Sequence[str]
+    ) -> OverloadDecision:
         if not self._history:
             return OverloadDecision(False, None, 0)
         s = self._history[-1]
-        violated = (s.cpu_pct >= self.th.cpu_pct) or (s.ram_pct >= self.th.ram_pct) or (s.latency_ms >= self.th.latency_ms)
+        violated = (
+            (s.cpu_pct >= self.th.cpu_pct)
+            or (s.ram_pct >= self.th.ram_pct)
+            or (s.latency_ms >= self.th.latency_ms)
+        )
         if violated:
             self._violation_streak += 1
         else:
