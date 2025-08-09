@@ -6,8 +6,10 @@ from dataclasses import dataclass
 
 try:
     import psutil  # type: ignore
-except Exception:  # fail soft si non installé
+except ImportError:  # fail soft si non installé
     psutil = None
+
+MAX_HISTORY = 128
 
 
 @dataclass
@@ -54,8 +56,8 @@ class HealthMonitor:
         snap = LoadSnapshot(ts=now, cpu_pct=cpu, ram_pct=ram, latency_ms=latency_ms)
         self._history.append(snap)
         # garder taille raisonnable
-        if len(self._history) > 128:
-            self._history = self._history[-128:]
+        if len(self._history) > MAX_HISTORY:
+            self._history = self._history[-MAX_HISTORY:]
         return snap
 
     def evaluate(

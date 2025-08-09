@@ -44,7 +44,9 @@ def open_db(path: str) -> sqlite3.Connection:
 
 def insert_order(conn: sqlite3.Connection, row: dict[str, Any]) -> None:
     conn.execute(
-        "INSERT OR REPLACE INTO orders(id, ts, symbol, side, type, qty, price, status, reason) VALUES()",
+        "INSERT OR REPLACE INTO orders("
+        "id, ts, symbol, side, type, qty, price, status, reason"
+        ") VALUES(?,?,?,?,?,?,?,?,?)",
         (
             row["id"],
             row["ts"],
