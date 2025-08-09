@@ -7,7 +7,7 @@ import logging
 import time
 from dataclasses import dataclass
 from types import TracebackType
-from typing import Any,Literal, Type
+from typing import Any, Literal
 from urllib.parse import urlencode
 
 import httpx
@@ -63,10 +63,10 @@ class KrakenClient:
         return self
 
     def __exit__(
-            self,
-            exc_type: Type[BaseException] | None,
-            exc: BaseException | None,
-            tb: TracebackType | None,
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
     ) -> Literal[False]:
         self.close()
         return False

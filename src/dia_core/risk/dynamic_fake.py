@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from dia_core.exec.pre_trade import RiskContext  # <- utilise la même dataclass que propose_order
 from dia_core.market_state.fake import (
     current_exposure_pct as _expo,
+)
+from dia_core.market_state.fake import (
     orders_last_min as _olm,
 )
 
