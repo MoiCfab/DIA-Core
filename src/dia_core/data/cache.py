@@ -1,23 +1,31 @@
 from __future__ import annotations
-
-import os
-
+from pathlib import Path
+import logging
 import pandas as pd
 
+logger = logging.getLogger(__name__)
 
-def cache_path(cache_dir: str, pair: str, interval: int) -> str:
-    os.makedirs(cache_dir, exist_ok=True)
+def cache_path(cache_dir: str, pair: str, interval: int) -> Path:
+    p = Path(cache_dir)
+    p.mkdir(parents=True, exist_ok=True)
     safe = pair.replace("/", "_")
-    return os.path.join(cache_dir, f"{safe}_{interval}.parquet")
+    return p / f"{safe}_{interval}.parquet"
 
-
-def load_cached(cache_dir: str, pair: str, interval: int) -> pd.DataFrame | None:
+def load_cache(cache_dir: str, pair: str, interval: int) -> pd.DataFrame | None:
+    """Lecture cache parquet, optionnelle si pyarrow/fastparquet absent."""
     path = cache_path(cache_dir, pair, interval)
-    if os.path.exists(path):
+    if not path.exists():
+        return None
+    try:
         return pd.read_parquet(path)
-    return None
-
+    except (ImportError, ValueError) as e:
+        logger.info("Parquet indisponible/illisible, skip read (%s): %s", path, e)
+        return None
 
 def save_cache(cache_dir: str, pair: str, interval: int, df: pd.DataFrame) -> None:
+    """Écriture cache parquet, optionnelle si pyarrow/fastparquet absent."""
     path = cache_path(cache_dir, pair, interval)
-    df.to_parquet(path, index=False)
+    try:
+        df.to_parquet(path, index=False)
+    except (ImportError, ValueError) as e:
+        logger.info("Parquet indisponible, skip write (%s): %s", path, e)
