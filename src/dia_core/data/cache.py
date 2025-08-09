@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 import os
-from typing import Optional
+
 import pandas as pd
 
 
@@ -10,7 +11,7 @@ def cache_path(cache_dir: str, pair: str, interval: int) -> str:
     return os.path.join(cache_dir, f"{safe}_{interval}.parquet")
 
 
-def load_cached(cache_dir: str, pair: str, interval: int) -> Optional[pd.DataFrame]:
+def load_cached(cache_dir: str, pair: str, interval: int) -> pd.DataFrame | None:
     path = cache_path(cache_dir, pair, interval)
     if os.path.exists(path):
         return pd.read_parquet(path)

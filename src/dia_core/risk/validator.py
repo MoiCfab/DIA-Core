@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from pydantic import BaseModel
-from typing import Optional
-
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
+from pydantic import BaseModel
 
 
 class ValidationResult(BaseModel):
     allowed: bool
-    reason: Optional[str] = None
+    reason: str | None = None
 
 
 def validate_order(

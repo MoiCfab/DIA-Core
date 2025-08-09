@@ -1,6 +1,6 @@
 from __future__ import annotations
+
 from pydantic import BaseModel
-from typing import List
 
 
 class Position(BaseModel):
@@ -14,6 +14,6 @@ class Position(BaseModel):
 class PortfolioSnapshot(BaseModel):
     equity: float
     cash: float
-    positions: List[Position] = []
+    positions: list[Position] = []
     max_drawdown_pct: float = 0.0
     exposure_pct: float = 0.0

@@ -1,19 +1,19 @@
 from __future__ import annotations
-import os
+
 import argparse
 import logging
+import os
 import time
-from dotenv import load_dotenv
-
-from dia_core.config.loader import load_config
-from dia_core.logging.setup import setup_logging
-from dia_core.kraken.client import KrakenClient
-from dia_core.exec.executor import Executor
-from dia_core.kraken.types import OrderIntent
-from dia_core.portfolio import journal
-from dia_core.data.provider import load_ohlc_window
 
 from dia_core.alerts.email_alerts import EmailAlerter, EmailConfig
+from dia_core.config.loader import load_config
+from dia_core.data.provider import load_ohlc_window
+from dia_core.exec.executor import Executor
+from dia_core.kraken.client import KrakenClient
+from dia_core.kraken.types import OrderIntent
+from dia_core.logging.setup import setup_logging
+from dia_core.portfolio import journal
+from dotenv import load_dotenv
 
 
 def main() -> None:

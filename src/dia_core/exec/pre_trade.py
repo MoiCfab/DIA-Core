@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from dia_core.config.models import AppConfig
+from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.kraken.types import OrderIntent
-from dia_core.config.models import AppConfig, RiskLimits as ConfigRiskLimits
-from dia_core.risk.sizing import compute_position_size
-from dia_core.risk.validator import validate_order, ValidationResult
 from dia_core.risk.errors import RiskLimitExceeded
+from dia_core.risk.sizing import compute_position_size
+from dia_core.risk.validator import ValidationResult, validate_order
 
 
 def pre_trade_checks(
