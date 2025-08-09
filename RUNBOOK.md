@@ -14,7 +14,7 @@ git add .
 git commit -m "feat: ajout gestion config avec pydantic-settings"
 
 # test avant de fusionner
-ruff check src tests --fix
+ruff check src tests
 black src tests
 mypy src tests --strict
 pytest -q
