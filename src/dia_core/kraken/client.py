@@ -1,4 +1,3 @@
-# src/dia_core/kraken/client.py
 from __future__ import annotations
 
 import base64
@@ -7,7 +6,7 @@ import hmac
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Dict
 from urllib.parse import urlencode
 
 import httpx
@@ -16,19 +15,22 @@ from .errors import AuthError, ConnectivityError, OrderRejected, RateLimitError
 
 logger = logging.getLogger("dia_core.kraken")
 
+# --- Constantes HTTP (évite magic numbers) ---
+HTTP_TOO_MANY_REQUESTS = 429
+HTTP_UNAUTHORIZED = 401
+HTTP_FORBIDDEN = 403
+HTTP_SERVER_MIN = 500
+HTTP_SERVER_MAX = 600  # exclusif
 
-def _sign(path: str, data: dict[str, Any], secret: str) -> str:
-    """
-    Kraken signature: base64(hmac_sha512(sha256(nonce+postdata) + path, secret))
-    """
+
+def _sign(path: str, data: Dict[str, Any], secret: str) -> str:
+    """Kraken: base64(hmac_sha512(sha256(nonce+postdata) + path, secret))."""
     postdata = urlencode(data or {}, doseq=True)
     sha = hashlib.sha256((str(data.get("nonce", "")) + postdata).encode()).digest()
     msg = path.encode() + sha
     mac = hmac.new(base64.b64decode(secret), msg, hashlib.sha512)
     return base64.b64encode(mac.digest()).decode()
 
-
-# NEW: regroupe les paramètres pour éviter PLR0913
 @dataclass(frozen=True)
 class KrakenClientConfig:
     base_url: str = "https://api.kraken.com"
@@ -36,8 +38,7 @@ class KrakenClientConfig:
     secret: str | None = None
     dry_run: bool = True
     timeout_s: float = 10.0
-    transport: httpx.BaseTransport | None = None  # pour tests
-
+    transport: httpx.BaseTransport | None = None  # tests
 
 class KrakenClient:
     def __init__(self, cfg: KrakenClientConfig) -> None:
@@ -52,46 +53,19 @@ class KrakenClient:
             headers={"User-Agent": "DIA-Core/kraken"},
         )
 
-    @classmethod
-    def from_args(
-        cls,
-        base_url: str = "https://api.kraken.com",
-        *,
-        key: str | None = None,
-        secret: str | None = None,
-        dry_run: bool = True,
-        timeout_s: float = 10.0,
-        transport: httpx.BaseTransport | None = None,
-    ) -> KrakenClient:
-        """
-        Compat pratique pour ne pas toucher tous les appelants tout de suite.
-        """
-        return cls(
-            KrakenClientConfig(
-                base_url=base_url,
-                key=key,
-                secret=secret,
-                dry_run=dry_run,
-                timeout_s=timeout_s,
-                transport=transport,
-            )
-        )
-
-    def close(self) -> None:
-        self._client.close()
-
-    # ---------- Core request avec retries ----------
+    # ---------- Core request (args groupés) ----------
     def _request(
         self,
         method: str,
         path: str,
-        params: dict[str, Any] | None = None,
-        data: dict[str, Any] | None = None,
+        *,
+        params: Dict[str, Any] | None = None,
+        data: Dict[str, Any] | None = None,
         private: bool = False,
         max_attempts: int = 3,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         url = path
-        headers: dict[str, str] = {
+        headers: Dict[str, str] = {
             "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
         }
 
@@ -101,7 +75,7 @@ class KrakenClient:
                 raise AuthError("Kraken API key/secret not configured")
             data = dict(data or {})
             data.setdefault("nonce", int(time.time() * 1000))
-            headers["API-Key"] = self.key
+            headers["API-Key"] = self.key  # type: ignore[assignment]
             headers["API-Sign"] = _sign(path, data, self.secret)  # type: ignore[arg-type]
             body = urlencode(data, doseq=True).encode()
 
@@ -112,22 +86,20 @@ class KrakenClient:
                 resp = self._client.request(
                     method, url, params=params, content=body, headers=headers
                 )
-                # Mapping HTTP
-                if resp.status_code == 429:
+                sc = resp.status_code
+                if sc == HTTP_TOO_MANY_REQUESTS:
                     raise RateLimitError("Rate limit (429)")
-                if resp.status_code in (401, 403):
-                    raise AuthError(f"Auth error ({resp.status_code})")
-                if 500 <= resp.status_code < 600:
-                    raise ConnectivityError(f"Server error {resp.status_code}")
+                if sc in (HTTP_UNAUTHORIZED, HTTP_FORBIDDEN):
+                    raise AuthError(f"Auth error ({sc})")
+                if HTTP_SERVER_MIN <= sc < HTTP_SERVER_MAX:
+                    raise ConnectivityError(f"Server error {sc}")
 
                 payload = resp.json()
-                # Kraken renvoie {"error": [...], "result": {...}}
                 if isinstance(payload, dict) and payload.get("error"):
-                    raise OrderRejected(str(payload["error"]))
+                    raise OrderRejected(str(payload["error"]))  # N818 ailleurs si tu renomme
 
                 if isinstance(payload, dict):
-                    return payload  # dict[str, Any]
-                # Si Kraken renvoie autre chose (peu probable), on uniformise
+                    return payload
                 return {"result": payload}
             except (httpx.HTTPError, ConnectivityError) as exc:
                 last_exc = exc
@@ -136,17 +108,18 @@ class KrakenClient:
                 time.sleep(backoff)
                 backoff *= 2.0
 
-        assert last_exc is not None
+        if last_exc is None:
+            raise ConnectivityError("Network failure after retries (unknown error)")
         raise ConnectivityError(f"Network failure after retries: {last_exc!r}")
 
     # ---------- Endpoints utiles ----------
-    def get_ohlc(self, pair: str, interval: int = 1) -> dict[str, Any]:
+    def get_ohlc(self, pair: str, interval: int = 1) -> Dict[str, Any]:
         params = {"pair": pair, "interval": interval}
         return self._request("GET", "/0/public/OHLC", params=params, private=False)
 
-    def add_order(self, data: dict[str, Any]) -> dict[str, Any]:
+    def add_order(self, data: Dict[str, Any]) -> Dict[str, Any]:
         if self.dry_run:
-            fake_tx = f"DIA-DRYRUN-{int(time.time()*1000)}"
+            fake_tx = f"DIA-DRYRUN-{int(time.time() * 1000)}"
             logger.info("Dry-run AddOrder", extra={"extra": {"txid": fake_tx}})
             return {"result": {"txid": [fake_tx]}}
         return self._request("POST", "/0/private/AddOrder", data=data, private=True)
