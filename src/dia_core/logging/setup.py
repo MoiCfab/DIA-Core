@@ -56,20 +56,19 @@ def setup_logging(
     trade_id: str | None = None,
     filename: str = "app.log",
 ) -> logging.Logger:
-    """
-    Configure 'dia_core' en JSON, rotation gzip, filtre trade_id.
-    Idempotent: ne reconfigure pas si déjà fait.
-    """
-    logger_name = "dia_core"
-    logger = logging.getLogger(logger_name)
+    logger = logging.getLogger("dia_core")
 
-    if logger_name in _CONFIGURED_LOGGERS:
-        return logger
+    # Idempotent: retire tout handler existant
+    for h in list(logger.handlers):
+        logger.removeHandler(h)
+        try:
+            h.close()
+        except Exception:
+            pass
 
     Path(log_dir).mkdir(parents=True, exist_ok=True)
     logfile = Path(log_dir) / filename
-
-    logfile.touch(exist_ok=True)
+    logfile.touch(exist_ok=True)  # garantit la présence du .log
 
     handler = RotatingFileHandler(
         filename=str(logfile),
@@ -85,7 +84,9 @@ def setup_logging(
     lvl_num = level if isinstance(level, int) else getattr(logging, level.upper(), logging.INFO)
     logger.setLevel(lvl_num)
     logger.addHandler(handler)
-    logger.propagate = False
+    logger.propagate = False  # évite double log vers root
 
-    _CONFIGURED_LOGGERS.add(logger_name)
+    # S’assure que les sous-loggers propagent bien vers "dia_core"
+    logging.getLogger("dia_core.test").propagate = True
+
     return logger
