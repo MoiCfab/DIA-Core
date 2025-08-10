@@ -18,7 +18,7 @@ git commit -m "feat: ajout gestion config avec pydantic-settings"
 # test avant de fusionner
 ruff check src tests --fix
 black src tests
-mypy src tests --strict
+mypy src tests --strict --pretty --show-error-codes
 pytest -q -vv
 
 # Fusionner dans main quand c’est prêt

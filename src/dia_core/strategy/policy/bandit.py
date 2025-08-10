@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Final
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 @dataclass(frozen=True)
@@ -32,8 +33,8 @@ class BanditPolicy:
     """
 
     arms: list[ArmConfig]
-    alpha: np.ndarray = field(default_factory=lambda: np.ones(3, dtype=float))
-    beta: np.ndarray = field(default_factory=lambda: np.ones(3, dtype=float))
+    alpha: NDArray[np.float64] = field(default_factory=lambda: np.ones(3, dtype=np.float64))
+    beta: NDArray[np.float64] = field(default_factory=lambda: np.ones(3, dtype=np.float64))
     epsilon: float = 0.05  # exploration minimale
     reward_scale: float = 0.01  # ~1% de PnL -> reward ~ 0.73
     storage_path: Path = Path("Logs/policy.json")
