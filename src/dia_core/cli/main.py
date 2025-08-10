@@ -154,6 +154,29 @@ def _handle_orchestrate(args: argparse.Namespace) -> int:
 
     cfg = SchedulerConfig(max_workers=int(args.max_workers))
     run_batch(syms, worker=_worker, cfg=cfg)
+    # Récap global (pour notifs)
+    with suppress(Exception):  # pragma: no cover
+
+        from dia_core.alerts.formatters import SymbolSummary
+        from dia_core.alerts.notify import notify_summary
+
+        summaries: list[SymbolSummary] = []
+        sym = args.symbol
+        summaries.append(
+            SymbolSummary(
+                symbol=sym,
+                side=None,  # on peut stocker le dernier side si tu veux le propager
+                k_atr=None,  # idem
+                sharpe=None,
+                sortino=None,
+                max_dd=None,
+                delta_eq_pct=None,
+                regime_score=None,
+                regime_mom=None,
+                regime_vol=None,
+            )
+        )
+        notify_summary(args.mode, summaries)
     return 0
 
 

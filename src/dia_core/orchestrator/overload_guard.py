@@ -35,7 +35,7 @@ class OverloadGuard:
         issues de la liste des paires non prioritaires.
       - Envoie une alerte email detaillee pour signaler l'action.
       - L'appelant decide ensuite si cette reduction est conservee ou si
-        le materiel est augmente.
+        le materiel est augmenté.
     """
 
     def __init__(self, alerter: EmailAlerter, thresholds: Thresholds | None = None) -> None:
@@ -63,10 +63,10 @@ class OverloadGuard:
         Args:
             active_pairs: Liste des paires actuellement actives.
             low_priority_pairs: Liste des paires consideres comme moins critiques.
-            avg_cycle_latency_ms: Latence moyenne d'un cycle de strategie.
+            avg_cycle_latency_ms: Latence moyenne d'un cycle de stratégie.
 
         Returns:
-            Nouvelle liste de paires actives apres eventuelle reduction.
+            Nouvelle liste de paires actives apres éventuelle reduction.
         """
         self.hm.sample(latency_ms=avg_cycle_latency_ms)
         decision = self.hm.evaluate(active_pairs, low_priority_pairs)
@@ -74,17 +74,17 @@ class OverloadGuard:
         if not decision.overloaded:
             return list(active_pairs)
 
-        # Selection des paires a retirer (debut de la liste low_priority)
+        # Selection des paires à retirer (debut de la liste low_priority)
         to_disable = list(low_priority_pairs)[: decision.drop_pairs]
         new_list = [p for p in active_pairs if p not in to_disable]
 
         # Construction du message d'alerte
-        subject = "[DIA-Core] Surcharge detectee - reduction du perimetre"
+        subject = "[DIA-Core] Surcharge détectée - reduction du périmètre"
         body = (
-            "Surcharge soutenue detectee (" + (decision.reason or "") + ")\n"
+            "Surcharge soutenue détectée (" + (decision.reason or "") + ")\n"
             f"Paires actives: {len(active_pairs)} -> {len(new_list)} (-{decision.drop_pairs})\n"
-            f"Paires desactivees: {to_disable}\n"
-            "Action requise: verifier optimisation ou augmenter la capacite.\n"
+            f"Paires désactivées: {to_disable}\n"
+            "Action requise: verifier optimisation ou augmenter la capacité.\n"
         )
 
         # Tentative d'envoi de l'alerte
@@ -92,7 +92,7 @@ class OverloadGuard:
             try:
                 self.alerter.send(subject, body)
             except Exception as err:
-                logger.warning("Alerte email echouee: %s", err)
+                logger.warning("Alerte email échouée: %s", err)
                 raise
 
         return new_list

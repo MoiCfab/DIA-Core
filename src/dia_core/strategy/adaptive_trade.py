@@ -22,9 +22,10 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
-from dia_core.exec.pre_trade import MarketSnapshot  # k_atr est dérivé ici
+from dia_core.exec.pre_trade import MarketSnapshot
 from dia_core.kraken.types import OrderIntent
 from dia_core.market_state.regime_vector import RegimeVector, compute_regime
+from dia_core.strategy.policy.bandit import BanditPolicy
 
 _MOMENTUM_BUY_THRESHOLD: float = 0.5
 
@@ -57,6 +58,7 @@ def decide_intent(
     symbol: str,
     params: AdaptiveParams | None = None,
     rng_seed: int | None = 42,
+    policy: BanditPolicy | None = None,
 ) -> tuple[OrderIntent | None, MarketSnapshot, RegimeVector]:
     """Génère éventuellement un OrderIntent en fonction du régime.
 
@@ -68,6 +70,12 @@ def decide_intent(
     """
     params = params or AdaptiveParams()
     regime = compute_regime(df)
+
+    # Si une policy est fournie, on tire un bras → hyperparamètres
+    if policy is not None:
+        _idx, cfg = policy.select(np.random.default_rng(rng_seed))
+        params = AdaptiveParams(**cfg)
+
     price = float(df["close"].iloc[-1]) if not df.empty else 0.0
 
     k_atr = _interp(params.k_atr_min, params.k_atr_max, regime.score)

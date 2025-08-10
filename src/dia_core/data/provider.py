@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import time
 from collections.abc import Mapping
-from typing import Any, Final, overload
+from typing import Any, Final
 
 import httpx
 import numpy as np
@@ -70,33 +70,7 @@ def load_ohlc_window(symbol: str, window: int = 200, *, interval_min: int = 1) -
         )
 
 
-@overload
-def ohlc_dataframe(
-    pair: str, payload: Mapping[str, Any], *, interval_min: int = 1
-) -> DataFrame: ...
-@overload
-def ohlc_dataframe(
-    payload: Mapping[str, Any], pair: str, *, interval_min: int = 1
-) -> DataFrame: ...
-@overload
-def ohlc_dataframe(symbol: str, window: int, *, interval_min: int = 1) -> DataFrame: ...
-
-
-def ohlc_dataframe(
-    arg1: str | Mapping[str, Any],
-    arg2: Mapping[str, Any] | str | int,
-    *,
-    interval_min: int = 1,
-) -> DataFrame:
-    if isinstance(arg1, str) and isinstance(arg2, Mapping):  # (pair, payload)
-        pair, payload = arg1, arg2
-    elif isinstance(arg1, Mapping) and isinstance(arg2, str):  # (payload, pair)
-        payload, pair = arg1, arg2
-    elif isinstance(arg1, str) and isinstance(arg2, int):  # (symbol, window)
-        return load_ohlc_window(arg1, arg2, interval_min=interval_min)
-    else:
-        raise TypeError("ohlc_dataframe: use (pair,payload) | (payload,pair) | (symbol,window)")
-
+def ohlc_dataframe(pair: str, payload: Mapping[str, Any], *, interval_min: int = 1) -> DataFrame:
     if "result" in payload and isinstance(payload["result"], Mapping) and pair in payload["result"]:
         rows = payload["result"][pair]
     elif pair in payload:
