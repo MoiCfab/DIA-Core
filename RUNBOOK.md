@@ -6,6 +6,8 @@
 ```bash
 git checkout -b feat/nom-de-la-feature
 
+#emplacement de environnement
+source .venv/bin/activate
 
 # Ajouter tous les fichiers modifiés
 git add .
