@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import contextlib
 import gzip
 import json
 import logging
-import contextlib
 from datetime import UTC, datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -82,9 +82,9 @@ def setup_logging(
     lvl_num = level if isinstance(level, int) else getattr(logging, level.upper(), logging.INFO)
     logger.setLevel(lvl_num)
     logger.addHandler(handler)
-    logger.propagate = False  
+    logger.propagate = False
 
-    # S’assure que les sous-loggers propagent bien vers "dia_core"
+    # S`assure que les sous-loggers propagent bien vers "dia_core"
     logging.getLogger("dia_core.test").propagate = True
 
     return logger
