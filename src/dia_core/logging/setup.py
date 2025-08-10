@@ -1,3 +1,23 @@
+# Copyright (c) 2025 Fabien Grolier - DYXIUM Invest / DIA-Core
+# All Rights Reserved - Usage without permission is prohibited
+
+"""
+Nom du module : logging/setup.py
+
+Description :
+Fournit la configuration de logging structuree pour DIA-Core.
+Les logs sont enregistrés en JSON, avec rotation et compression gzip.
+Chaque entree peut contenir un identifiant de trade pour faciliter le suivi.
+Le systeme est base sur `logging` standard de Python, avec un formatter
+et un filtre personnalises.
+
+Utilise par :
+    main.py (initialisation logging au demarrage)
+    tous les modules dia_core (journalisation structuree)
+
+Auteur : DYXIUM Invest / D.I.A. Core
+"""
+
 from __future__ import annotations
 
 import contextlib
@@ -9,23 +29,29 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
 
-# --- registre pour éviter la double config ---
+# --- Registre pour eviter la double configuration des loggers ---
 _CONFIGURED_LOGGERS: set[str] = set()
 
 
 class _TradeIdFilter(logging.Filter):
+    """Filtre qui ajoute un identifiant de trade a chaque entree de log."""
+
     def __init__(self, trade_id: str | None) -> None:
         super().__init__()
         self._trade_id = trade_id
 
     def filter(self, record: logging.LogRecord) -> bool:
+        """Ajoute le champ trade_id au record s'il n'existe pas deja."""
         if not hasattr(record, "trade_id"):
             record.trade_id = self._trade_id
         return True
 
 
 class _JsonFormatter(logging.Formatter):
+    """Formatter qui convertit chaque log en entree JSON."""
+
     def format(self, record: logging.LogRecord) -> str:
+        """Formate un log record en JSON avec timestamp, niveau, nom et message."""
         payload: dict[str, Any] = {
             "ts": datetime.now(UTC).isoformat(),
             "level": record.levelname,
@@ -42,12 +68,14 @@ class _JsonFormatter(logging.Formatter):
 
 
 def _gzip_rotator(source: str, dest: str) -> None:
+    """Fonction de rotation pour compresser un fichier log en .gz."""
     with open(source, "rb") as sf, gzip.open(dest, "wb", compresslevel=6) as df:
         df.write(sf.read())
     Path(source).unlink(missing_ok=True)
 
 
 def _gz_namer(name: str) -> str:
+    """Ajoute l'extension .gz au nom du fichier de log."""
     return f"{name}.gz"
 
 
@@ -57,8 +85,20 @@ def setup_logging(
     trade_id: str | None = None,
     filename: str = "app.log",
 ) -> logging.Logger:
+    """Configure le logger principal de DIA-Core avec sortie JSON et rotation gzip.
+
+    Args:
+        log_dir: Repertoire ou stocker les fichiers de log.
+        level: Niveau de log ("INFO", "DEBUG", int, etc.).
+        trade_id: Identifiant optionnel de trade a inclure dans tous les logs.
+        filename: Nom du fichier log principal.
+
+    Returns:
+        Logger configure et pret a l'emploi.
+    """
     logger = logging.getLogger("dia_core")
 
+    # Nettoie les handlers precedents
     for h in list(logger.handlers):
         logger.removeHandler(h)
         with contextlib.suppress(Exception):
@@ -84,7 +124,7 @@ def setup_logging(
     logger.addHandler(handler)
     logger.propagate = False
 
-    # S`assure que les sous-loggers propagent bien vers "dia_core"
+    # S'assure que les sous-loggers propagent bien vers "dia_core"
     logging.getLogger("dia_core.test").propagate = True
 
     return logger

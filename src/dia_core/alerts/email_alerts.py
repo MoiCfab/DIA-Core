@@ -1,3 +1,22 @@
+# Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
+# All Rights Reserved — Usage without permission is prohibited
+
+"""
+Nom du module : email_alert.py
+
+Description :
+Ce module fournit une implémentation minimale et synchrone pour l`envoi d`alertes email
+via SMTP. Il supporte à la fois STARTTLS (port 587) et SSL/TLS direct (port 465).
+Utilisé pour notifier l`utilisateur de DIA-Core en cas d`événements critiques.
+
+Utilisé par :
+    health_monitor.py (alerte surcharge CPU/RAM, désactivation paires)
+    monitoring.py (alerte drawdown, perte de connexion API)
+    main.py (test de configuration SMTP)
+
+Auteur : DYXIUM Invest / D.I.A. Core
+"""
+
 from __future__ import annotations
 
 import logging
@@ -23,8 +42,8 @@ class EmailConfig:
 class EmailAlerter:
     """Alerte email simple, synchrone, sans dépendance externe.
 
-    Usage:
-        alerter = EmailAlerter(EmailConfig(...))
+    Usage :
+        alerter = EmailAlerter (EmailConfig(...))
         alerter.send(
             subject="[DIA-Core] Surcharge CPU",
             body="CPU 95% sur 2 min, 3 paires désactivées",

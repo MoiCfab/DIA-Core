@@ -1,3 +1,26 @@
+# Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
+# All Rights Reserved — Usage without permission is prohibited
+
+"""
+Nom du module : main.py
+
+Description :
+Point d'entrée principal en ligne de commande pour DIA-Core.
+Ce module gère :
+    Le chargement de la configuration (JSON + variables d'environnement)
+    L'initialisation du logging structuré
+    La configuration et l'envoi d'une alerte email au démarrage
+    Le chargement des données OHLC depuis Kraken
+    L'initialisation de l'exécuteur d'ordres (dry-run par défaut)
+    L'enregistrement des ordres et événements dans le journal local.
+
+Utilisé par :
+    Exécution directe via CLI : "python -m dia_core.cli.main" ou binaire packagé
+    Scripts d'automatisation ou services systemd (exécution 24/7)
+
+Auteur : DYXIUM Invest / D.I.A. Core
+"""
+
 from __future__ import annotations
 
 import argparse

@@ -1,3 +1,18 @@
+# Copyright (c) 2025 Fabien Grolier - DYXIUM Invest / DIA-Core
+# All Rights Reserved - Usage without permission is prohibited
+
+"""
+Nom du module : tests/test_risk_manager.py
+
+Description :
+Tests unitaires couvrant le calcul de taille de position, la validation
+des limites de risque et le comportement pre-trade dans DIA-Core.
+Vérifie que les paramètres minimaux sont respectés et que les blocages
+s'appliquent correctement en cas de violation des limites.
+
+Auteur : DYXIUM Invest / D.I.A. Core
+"""
+
 from __future__ import annotations
 
 import pytest
@@ -10,6 +25,7 @@ from dia_core.risk.validator import RiskCheckParams, validate_order
 
 
 def _cfg() -> AppConfig:
+    """Cree une configuration AppConfig de test avec paramètres standards."""
     return AppConfig(
         mode="dry_run",
         exchange=ExchangeMeta(
@@ -36,12 +52,13 @@ def _cfg() -> AppConfig:
 
 
 def test_sizing_min_qty_notional_respected() -> None:
+    """Teste que compute_position_size respecte min_qty et min_notional."""
     min_qty = 0.003
     min_notional = 10.0
-    equity = 1000.0  # capital total
-    price = 200.0  # prix actuel
-    atr = 5.0  # volatilité ATR
-    k_atr = 2.0  # multiplicateur
+    equity = 1000.0
+    price = 200.0
+    atr = 5.0
+    k_atr = 2.0
     cfg = AppConfig(
         risk=RiskLimits(
             risk_per_trade_pct=1.0,
@@ -75,13 +92,14 @@ def test_sizing_min_qty_notional_respected() -> None:
 
 
 def test_validator_blocks_on_exposure() -> None:
+    """Teste que validate_order bloque si l'exposition projetée dépasse la limite."""
     limits = _cfg().risk
     with pytest.raises(RiskLimitExceededError):
         validate_order(
             limits,
             RiskCheckParams(
                 current_exposure_pct=49.0,
-                projected_exposure_pct=55.0,  # dépasse
+                projected_exposure_pct=55.0,  # depasse la limite
                 daily_loss_pct=0.0,
                 drawdown_pct=0.0,
                 orders_last_min=0,
@@ -90,12 +108,11 @@ def test_validator_blocks_on_exposure() -> None:
 
 
 def test_pre_trade_blocks_when_limits_violated() -> None:
+    """Teste que propose_order leve une erreur si les limites de risque sont violées."""
     cfg = _cfg()
-    # Valeurs choisies pour dépasser max_exposure_pct (=50%)
     equity = 1000.0
     price = 100.0
     atr = 1.0
-    # Projection: current 50% + nouveau > 0 -> blocage
     try:
         market = MarketSnapshot(price=price, atr=atr, k_atr=2.0)
         risk = build_risk_context(
@@ -108,10 +125,11 @@ def test_pre_trade_blocks_when_limits_violated() -> None:
 
 
 def test_pre_trade_ok_when_within_limits() -> None:
+    """Teste que propose_order fonctionne lorsque toutes les limites sont respectées."""
     cfg = _cfg()
     equity = 10000.0
     price = 100.0
-    atr = 5.0  # stop plus large donc qty plus faible
+    atr = 5.0
     market = MarketSnapshot(price=price, atr=atr, k_atr=2.0)
     risk = build_risk_context(equity=equity, open_notional=0.0, fallback_orders_last_min=0)
     out = propose_order(cfg=cfg, market=market, risk=risk)

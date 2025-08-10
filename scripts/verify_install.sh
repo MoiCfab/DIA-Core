@@ -1,4 +1,19 @@
 #!/usr/bin/env bash
+# Copyright (c) 2025 Fabien Grolier - DYXIUM Invest / DIA-Core
+# All Rights Reserved - Usage without permission is prohibited
+#
+# Nom du script : scripts/verify_install.sh
+#
+# Description :
+#   Script de verification post-installation pour le bot DIA-Core.
+#   - Contrôle la presence des repertoires, fichiers et droits d'accès.
+#   - Vérifie la version de Python et la validité du fichier de configuration.
+#   - Lance un test Python minimal (smoke test) hors réseau pour s'assurer
+#     que les modules critiques fonctionnent.
+#   - Contrôle l'état du service systemd et affiche les derniers logs.
+#
+# Auteur : DYXIUM Invest / D.I.A. Core
+#
 set -euo pipefail
 
 APP_DIR="/opt/dia-core"
@@ -9,6 +24,7 @@ CONFIG="$APP_DIR/Config/config.json"
 ENVFILE="$APP_DIR/.env"
 LOG_DIR="/var/log/dia-core"
 
+# Fonctions d'affichage colore
 _red()  { printf "\033[31m%s\033[0m\n" "$*"; }
 _grn()  { printf "\033[32m%s\033[0m\n" "$*"; }
 _yel()  { printf "\033[33m%s\033[0m\n" "$*"; }
@@ -17,7 +33,7 @@ _ok()   { _grn "✓ $*"; }
 
 echo "== DIA-Core verify =="
 
-# 0) Binaries
+# 0) Binaries indispensables
 command -v systemctl >/dev/null || _fail "systemctl introuvable"
 command -v python3   >/dev/null || _fail "python3 introuvable"
 
@@ -26,7 +42,7 @@ command -v python3   >/dev/null || _fail "python3 introuvable"
 [ -d "$VENV"    ] || _fail "$VENV manquant"
 [ -d "$LOG_DIR" ] || _fail "$LOG_DIR manquant"
 [ -f "$CONFIG"  ] || _fail "$CONFIG manquant"
-[ -f "$ENVFILE" ] || _yel  "$ENVFILE manquant (pas bloquant si variables déjà exportées)"
+[ -f "$ENVFILE" ] || _yel "$ENVFILE manquant (pas bloquant si variables deja exportées)"
 
 # 2) Ownership
 own_app="$(stat -c '%U:%G' "$APP_DIR")"
@@ -62,7 +78,7 @@ import json,sys,os
 p=os.environ.get("CONFIG","$CONFIG")
 with open(p,"r",encoding="utf-8") as f: j=json.load(f)
 for k in ("mode","logging","exchange","risk"):
-    assert k in j, f"clé manquante: {k}"
+    assert k in j, f"cle manquante: {k}"
 print("config OK")
 PY
 _ok "Config JSON OK"
@@ -105,14 +121,14 @@ _ok "Imports/logic OK"
 systemctl cat "$SERVICE" >/dev/null 2>&1 || _fail "Service $SERVICE absent"
 is_enabled="$(systemctl is-enabled "$SERVICE" || true)"
 is_active="$(systemctl is-active "$SERVICE" || true)"
-[ "$is_enabled" = "enabled" ] || _yel "Service non activé (is-enabled=$is_enabled)"
+[ "$is_enabled" = "enabled" ] || _yel "Service non active (is-enabled=$is_enabled)"
 [ "$is_active"  = "active"  ] || _yel "Service non démarré (is-active=$is_active)"
 
 # 8) Derniers logs
-echo "--- journalctl (dernieres lignes) ---"
+echo "--- journal ctl (dernières lignes) ---"
 journalctl -u "$SERVICE" -n 50 --no-pager || true
 echo "-------------------------------------"
 
-_grn "Vérification terminée."
+_grn "Verification terminée."
 [ "$is_active" = "active" ] || { _yel "TIP: sudo systemctl restart $SERVICE"; exit 0; }
 exit 0

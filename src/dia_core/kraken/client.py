@@ -1,3 +1,23 @@
+# Copyright (c) 2025 Fabien Grolier - DYXIUM Invest / DIA-Core
+# All Rights Reserved - Usage without permission is prohibited
+
+"""
+Nom du module : kraken/client.py
+
+Description :
+Client HTTP pour l'API Kraken, avec signature des requetes privees, gestion
+des erreurs, retries avec backoff exponentiel, et mode dry-run.
+Expose des methodes utilitaires pour:
+- recuperer des OHLC publiques,
+- soumettre un ordre (AddOrder) avec validation serveur.
+
+Utilise par :
+    data/provider.py (telechargement OHLC)
+    exec/executor.py (soumission et validation d'ordre)
+
+Auteur : DYXIUM Invest / D.I.A. Core
+"""
+
 from __future__ import annotations
 
 import base64
@@ -24,6 +44,19 @@ HTTP_SERVER_MAX = 600  # exclusif
 
 
 def _sign(path: str, data: dict[str, Any], secret: str) -> str:
+    """Calcule la signature Kraken pour une requete privee.
+
+    La signature utilise:
+      mac = HMAC_SHA512(secret_decoded, path + SHA256(nonce + postdata))
+
+    Args:
+        path: Chemin de l'endpoint (ex: "/0/private/AddOrder").
+        data: Donnees du corps POST (incluant "nonce").
+        secret: Cle API privee en Base64.
+
+    Returns:
+        Chaine Base64 representant la signature a placer dans l'entete "API-Sign".
+    """
     postdata = urlencode(data or {}, doseq=True)
     sha = hashlib.sha256((str(data.get("nonce", "")) + postdata).encode()).digest()
     msg = path.encode() + sha
@@ -33,6 +66,17 @@ def _sign(path: str, data: dict[str, Any], secret: str) -> str:
 
 @dataclass(frozen=True)
 class KrakenClientConfig:
+    """Configuration du client Kraken.
+
+    Attributes:
+        base_url: URL de base de l'API Kraken.
+        key: Cle publique API (optionnelle si requetes publiques uniquement).
+        secret: Cle privee API Base64 (requises pour endpoints prives).
+        dry_run: Si vrai, n'effectue pas de POST reel sur AddOrder.
+        timeout_s: Delai total des requetes HTTP.
+        transport: Transport httpx (mock en tests).
+    """
+
     base_url: str = "https://api.kraken.com"
     key: str | None = None
     secret: str | None = None
@@ -43,6 +87,15 @@ class KrakenClientConfig:
 
 @dataclass(frozen=True)
 class RequestOpts:
+    """Options de requete internes.
+
+    Attributes:
+        params: Parametres de requete (query string).
+        data: Corps POST (form-url-encoded).
+        private: True si endpoint prive (signature/entetes necessaires).
+        max_attempts: Nombre d'essais avec backoff en cas d'erreurs transitoires.
+    """
+
     params: dict[str, Any] | None = None
     data: dict[str, Any] | None = None
     private: bool = False
@@ -50,7 +103,17 @@ class RequestOpts:
 
 
 class KrakenClient:
+    """Client synchrone pour l'API Kraken base sur httpx.Client.
+
+    Ce client gere:
+      - la signature des endpoints prives,
+      - la normalisation des reponses JSON,
+      - la detection des erreurs HTTP et "payload['error']",
+      - un retry simple avec backoff exponentiel sur erreurs reseau/serveur.
+    """
+
     def __init__(self, cfg: KrakenClientConfig) -> None:
+        """Construit le client httpx avec configuration et headers par defaut."""
         self.base_url = cfg.base_url.rstrip("/")
         self.key = cfg.key
         self.secret = cfg.secret
@@ -63,9 +126,11 @@ class KrakenClient:
         )
 
     def close(self) -> None:
+        """Ferme le client HTTP sous-jacent."""
         self._client.close()
 
     def __enter__(self) -> KrakenClient:
+        """Support du context manager (with KrakenClient(...) as c: ...)."""
         return self
 
     def __exit__(
@@ -74,10 +139,25 @@ class KrakenClient:
         exc: BaseException | None,
         tb: TracebackType | None,
     ) -> Literal[False]:
+        """Ferme automatiquement le client a la sortie du contexte."""
         self.close()
         return False
 
     def _handle_response(self, resp: httpx.Response) -> dict[str, Any]:
+        """Traduit la reponse HTTP en payload Python et leve en cas d'erreur.
+
+        Args:
+            resp: Reponse httpx.
+
+        Returns:
+            Un dictionnaire representant le payload normalise.
+
+        Raises:
+            RateLimitError: 429.
+            AuthError: 401 ou 403.
+            ConnectivityError: erreurs serveur 5xx.
+            OrderRejectedError: si "error" est renseigne dans la reponse Kraken.
+        """
         sc = resp.status_code
         if sc == HTTP_TOO_MANY_REQUESTS:
             raise RateLimitError("Rate limit (429)")
@@ -90,8 +170,22 @@ class KrakenClient:
             raise OrderRejectedError(str(payload["error"]))
         return payload if isinstance(payload, dict) else {"result": payload}
 
-    # ---------- Core request (args groupés) ----------
     def _request(self, method: str, path: str, *, opts: RequestOpts) -> dict[str, Any]:
+        """Effectue une requete HTTP signe si necessaire, avec retries.
+
+        Args:
+            method: "GET" ou "POST".
+            path: Chemin d'endpoint Kraken (ex: "/0/public/OHLC").
+            opts: Options de requete (params, data, private, max_attempts).
+
+        Returns:
+            Payload JSON sous forme de dict.
+
+        Raises:
+            AuthError: si une requete privee est appelee sans cles.
+            ConnectivityError: en cas d'echec apres retries.
+            RateLimitError, OrderRejectedError: propagees depuis _handle_response.
+        """
         url = path
         headers: dict[str, str] = {
             "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
@@ -128,10 +222,34 @@ class KrakenClient:
 
     # ---------- Endpoints utiles ----------
     def get_ohlc(self, pair: str, interval: int = 1) -> dict[str, Any]:
+        """Recupere des bougies OHLC publiques.
+
+        Args:
+            pair: Symbole de la paire (ex: "XXBTZEUR").
+            interval: Intervalle en minutes.
+
+        Returns:
+            Payload JSON normalise de l'endpoint OHLC.
+        """
         params = {"pair": pair, "interval": interval}
         return self._request("GET", "/0/public/OHLC", opts=RequestOpts(params=params))
 
     def add_order(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Soumet un ordre AddOrder cote Kraken.
+
+        En mode dry_run, retourne un faux txid et ne contacte pas Kraken.
+        Sinon, envoie un POST prive avec signature.
+
+        Args:
+            data: Corps POST attendu par Kraken AddOrder.
+
+        Returns:
+            Payload JSON normalise de l'endpoint AddOrder ou reponse simulee.
+
+        Raises:
+            AuthError, RateLimitError, OrderRejectedError, ConnectivityError:
+            selon les erreurs detectees par _request et _handle_response.
+        """
         if self.dry_run:
             fake_tx = f"DIA-DRYRUN-{int(time.time() * 1000)}"
             logger.info("Dry-run AddOrder", extra={"extra": {"txid": fake_tx}})

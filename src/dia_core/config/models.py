@@ -1,3 +1,23 @@
+# Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
+# All Rights Reserved — Usage without permission is prohibited
+
+"""
+Nom du module : config/models.py
+
+Description :
+Définit les modèles de configuration pour DIA-Core à l'aide de Pydantic.
+Ces modèles centralisent et valident tous les paramètres du bot, tels que :
+    les informations liées à l'exchange,
+    les limites de risque,
+    les chemins de stockage et paramètres globaux.
+
+Utilisé par :
+    onfig/loader.py (chargement et validation de la configuration)
+    main.py (initialisation des composants principaux)
+
+Auteur : DYXIUM Invest / D.I.A. Core
+"""
+
 from __future__ import annotations
 
 from typing import Literal
@@ -8,6 +28,16 @@ Mode = Literal["dry_run", "paper", "live"]
 
 
 class ExchangeMeta(BaseModel):
+    """Métadonnées de l'exchange et contraintes associées.
+
+    Attributes :
+        symbol : Paire de trading (ex : 'BTC/EUR').
+        price_decimals : Nombre de décimales pour le prix.
+        qty_decimals : Nombre de décimales pour la quantité.
+        min_qty : Quantité minimale autorisée.
+        min_notional : Notionnel minimal (prix * quantité) autorisé.
+    """
+
     symbol: str = Field(..., description="Paire ex: 'BTC/EUR'")
     price_decimals: int = 2
     qty_decimals: int = 6
@@ -16,6 +46,16 @@ class ExchangeMeta(BaseModel):
 
 
 class RiskLimits(BaseModel):
+    """Paramètres de gestion du risque.
+
+    Attributes:
+        max_daily_loss_pct : Perte quotidienne maximale (en % de l'équité).
+        max_drawdown_pct : Drawdown maximal autorisé (en % de l'équité).
+        max_exposure_pct : Exposition maximale autorisée (en % de l'équité).
+        risk_per_trade_pct : Risque par trade (en % de l'équité).
+        max_orders_per_min : Nombre maximum d'ordres par minute.
+    """
+
     max_daily_loss_pct: float = 2.0
     max_drawdown_pct: float = 15.0
     max_exposure_pct: float = 50.0
@@ -24,6 +64,20 @@ class RiskLimits(BaseModel):
 
 
 class AppConfig(BaseModel):
+    """Configuration principale de DIA-Core.
+
+    Attributes :
+        mode : Mode d'exécution ("dry_run", "paper", "live").
+        exchange : Métadonnées et contraintes liées à l'exchange.
+        risk : Paramètres de gestion du risque.
+        data_window_bars : Nombre de bougies conservées en mémoire pour les indicateurs.
+        cache_dir : Répertoire pour le cache local.
+        journal_path : Chemin vers la base SQLite du journal.
+        log_dir : Répertoire des logs.
+        pair : Paire de trading principale.
+        require_interactive_confirm : Demande une confirmation manuelle avant exécution réelle.
+    """
+
     mode: Mode = "dry_run"
     exchange: ExchangeMeta
     risk: RiskLimits = RiskLimits()
@@ -37,6 +91,18 @@ class AppConfig(BaseModel):
     @field_validator("mode")
     @classmethod
     def warn_if_live(cls, v: Mode) -> Mode:
+        """Affiche un avertissement si le mode "live" est activé.
+
+        Args :
+            v: Valeur du champ "mode".
+
+        Returns :
+            La valeur inchangée de "mode".
+
+        Notes :
+            Cette validation n'empêche pas l'exécution en mode "live", mais
+            signale à l'utilisateur que le bot sera en conditions réelles.
+        """
         if v == "live":
             print("[SECURITY] Attention: mode LIVE activé")
         return v
