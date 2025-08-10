@@ -27,7 +27,7 @@ def test_ohlc_dataframe_basic() -> None:
         que la longueur du DataFrame correspond au nombre de lignes du payload
     """
     payload = {"XXBTZEUR": [[1710000000, 1, 2, 0.5, 1.5, 1.2, 10.0, 42]]}
-    df = ohlc_dataframe({**payload}, "XXBTZEUR")
+    df = ohlc_dataframe("XXBTZEUR", {**payload})
     assert isinstance(df, pd.DataFrame)
     assert list(df.columns)[:5] == ["time", "open", "high", "low", "close"]
     assert len(df) == 1
