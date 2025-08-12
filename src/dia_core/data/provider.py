@@ -24,6 +24,7 @@ def _kraken_pair(symbol: str) -> str:
 
     Args:
       symbol: str:
+      symbol: str:
 
     Returns:
 
@@ -38,6 +39,8 @@ def get_last_price(symbol: str, *, timeout_s: float = 7.0) -> float:
     Args:
       symbol: str:
       *:
+      timeout_s: float:  (Default value = 7.0)
+      symbol: str:
       timeout_s: float:  (Default value = 7.0)
 
     Returns:
@@ -64,6 +67,9 @@ def load_ohlc_window(symbol: str, window: int = 200, *, interval_min: int = 1) -
       symbol: str:
       window: int:  (Default value = 200)
       *:
+      interval_min: int:  (Default value = 1)
+      symbol: str:
+      window: int:  (Default value = 200)
       interval_min: int:  (Default value = 1)
 
     Returns:
@@ -109,6 +115,9 @@ def ohlc_dataframe(pair: str, payload: Mapping[str, Any], *, interval_min: int =
       payload: Mapping[str:
       Any]:
       *:
+      interval_min: int:  (Default value = 1)
+      pair: str:
+      payload: Mapping[str:
       interval_min: int:  (Default value = 1)
 
     Returns:

@@ -19,6 +19,7 @@ def main(argv: list[str] | None = None) -> int:
 
     Args:
       argv: list[str] | None:  (Default value = None)
+      argv: list[str] | None:  (Default value = None)
 
     Returns:
 

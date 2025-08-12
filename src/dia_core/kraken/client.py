@@ -57,6 +57,9 @@ def _sign(path: str, data: dict[str, Any], secret: str) -> str:
       data: dict[str:
       Any]:
       secret: str:
+      path: str:
+      data: dict[str:
+      secret: str:
 
     Returns:
       : Chaine Base64 representant la signature a placer dans l'entete "API-Sign".
@@ -143,6 +146,7 @@ class KrakenClient:
         Args:
           resp: Reponse httpx.
           resp: httpx.Response:
+          resp: httpx.Response:
 
         Returns:
           : Un dictionnaire representant le payload normalise.
@@ -176,6 +180,9 @@ class KrakenClient:
           method: str:
           path: str:
           *:
+          opts: RequestOpts:
+          method: str:
+          path: str:
           opts: RequestOpts:
 
         Returns:
@@ -228,8 +235,6 @@ class KrakenClient:
         Args:
           pair: Symbole de la paire (ex: "XXBTZEUR").
           interval: Intervalle en minutes.
-          pair: str:
-          interval: int:  (Default value = 1)
 
         Returns:
           : Payload JSON normalise de l'endpoint OHLC.
@@ -246,8 +251,7 @@ class KrakenClient:
 
         Args:
           data: Corps POST attendu par Kraken AddOrder.
-          data: dict[str:
-          Any]:
+          data: dict[str]:
 
         Returns:
           : Payload JSON normalise de l'endpoint AddOrder ou reponse simulee.

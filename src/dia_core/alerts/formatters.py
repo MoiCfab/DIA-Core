@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 
 @dataclass(frozen=True)
 class SymbolSummary:
-    """ """
+    """Conteneur des champs affichés dans les messages."""
 
     symbol: str
     side: str | None
@@ -32,6 +32,8 @@ def _fmt_pct(x: float | None, *, plus: bool = True) -> str:
       x: float | None:
       *:
       plus: bool:  (Default value = True)
+      x: float | None:
+      plus: bool:  (Default value = True)
 
     Returns:
 
@@ -46,6 +48,8 @@ def render_subject(mode: str, items: list[SymbolSummary]) -> str:
     """
 
     Args:
+      mode: str:
+      items: list[SymbolSummary]:
       mode: str:
       items: list[SymbolSummary]:
 
@@ -66,6 +70,8 @@ def render_text(mode: str, items: list[SymbolSummary]) -> str:
     """
 
     Args:
+      mode: str:
+      items: list[SymbolSummary]:
       mode: str:
       items: list[SymbolSummary]:
 
@@ -103,6 +109,8 @@ def render_markdown(mode: str, items: list[SymbolSummary]) -> str:
     """
 
     Args:
+      mode: str:
+      items: list[SymbolSummary]:
       mode: str:
       items: list[SymbolSummary]:
 

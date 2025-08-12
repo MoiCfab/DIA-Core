@@ -46,6 +46,8 @@ def notify_summary(mode: str, items: list[SymbolSummary]) -> None:
     Args:
       mode: str:
       items: list[SymbolSummary]:
+      mode: str:
+      items: list[SymbolSummary]:
 
     Returns:
 

@@ -14,7 +14,7 @@ from typing import Any
 
 @dataclass(frozen=True)
 class RolloutEvent:
-    """ """
+    """Buffer d`événements pour journaliser décisions et résultats."""
 
     ts: int
     phase: str  # "decision" | "outcome"
@@ -35,6 +35,7 @@ class RolloutBuffer:
 
         Args:
           event: RolloutEvent:
+          event: RolloutEvent:
 
         Returns:
 
@@ -52,9 +53,15 @@ class RolloutBuffer:
         params: dict[str, float],
         side: str | None,
     ) -> None:
-        """
+        """Args:
+          *:
+          symbol: str:
+          arm_idx: int:
+          regime: dict[str:
+          float]:
 
         Args:
+          side: str
           *:
           symbol: str:
           arm_idx: int:
@@ -64,6 +71,7 @@ class RolloutBuffer:
           side: str | None:
 
         Returns:
+
 
         """
         self.append(
@@ -81,6 +89,9 @@ class RolloutBuffer:
 
         Args:
           *:
+          symbol: str:
+          arm_idx: int:
+          reward: float:
           symbol: str:
           arm_idx: int:
           reward: float:

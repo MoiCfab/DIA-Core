@@ -96,6 +96,10 @@ def pre_trade_checks(
       limits: ConfigRiskLimits:
       _equity: float:
       _min_notional: float:
+      intent: OrderIntent:
+      limits: ConfigRiskLimits:
+      _equity: float:
+      _min_notional: float:
 
     Returns:
 
@@ -142,6 +146,9 @@ def propose_order(*, cfg: AppConfig, market: MarketSnapshot, risk: RiskContext) 
 
     Args:
       *:
+      cfg: AppConfig:
+      market: MarketSnapshot:
+      risk: RiskContext:
       cfg: AppConfig:
       market: MarketSnapshot:
       risk: RiskContext:

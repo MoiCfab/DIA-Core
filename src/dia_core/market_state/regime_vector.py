@@ -41,6 +41,11 @@ class RegimeVector:
         entropy : entropie des retours (Shannon) normalisée ∈ [0,1]
         spread : (high-low)/close normalisé ∈ [0,1]
         score : intensité agrégée du régime (moyenne pondérée) ∈ [0,1]
+
+    Args:
+
+    Returns:
+
     """
 
     volatility: float
@@ -55,6 +60,14 @@ _SMALL: Final[float] = 1e-12
 
 
 def _safe_min_max(x: NDArray[np.float64]) -> tuple[float, float]:
+    """
+
+    Args:
+      x: NDArray[np.float64]:
+
+    Returns:
+
+    """
     a = float(np.nanmin(x))
     b = float(np.nanmax(x))
     if not np.isfinite(a) or not np.isfinite(b) or abs(b - a) < _SMALL:
@@ -63,11 +76,27 @@ def _safe_min_max(x: NDArray[np.float64]) -> tuple[float, float]:
 
 
 def _minmax_scale(x: NDArray[np.float64]) -> NDArray[np.float64]:
+    """
+
+    Args:
+      x: NDArray[np.float64]:
+
+    Returns:
+
+    """
     lo, hi = _safe_min_max(x)
     return np.clip((x - lo) / (hi - lo + _SMALL), 0.0, 1.0).astype(np.float64)
 
 
 def _zscore01(x: NDArray[np.float64]) -> NDArray[np.float64]:
+    """
+
+    Args:
+      x: NDArray[np.float64]:
+
+    Returns:
+
+    """
     mu = float(np.nanmean(x))
     sd = float(np.nanstd(x))
     z = (x - mu) / (sd + _SMALL)
@@ -77,6 +106,15 @@ def _zscore01(x: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def _entropy01(r: NDArray[np.float64], bins: int = 15) -> float:
+    """
+
+    Args:
+      r: NDArray[np.float64]:
+      bins: int:  (Default value = 15)
+
+    Returns:
+
+    """
     # Histogramme discret des retours, entropie de Shannon
     hist, _ = np.histogram(r[np.isfinite(r)], bins=bins, density=True)
     p = hist[hist > 0]
@@ -91,11 +129,15 @@ def compute_regime(df: pd.DataFrame, *, mom_window: int = 20) -> RegimeVector:
     """Calcule un vecteur de régime continu à partir d'une fenêtre OHLC.
 
     Args:
-        df: Fenêtre OHLC (≥ mom_window lignes).
-        mom_window: Fenêtre pour le momentum directionnel.
+      df: Fenêtre OHLC (≥ mom_window lignes).
+      mom_window: Fenêtre pour le momentum directionnel.
+      df: pd.DataFrame:
+      *:
+      mom_window: int:  (Default value = 20)
 
     Returns:
-        RegimeVector avec composantes ∈ [0,1].
+      : RegimeVector avec composantes ∈ [0,1].
+
     """
     if df.empty or len(df) < max(5, mom_window):
         return RegimeVector(0.0, 0.5, 0.0, 0.0, 0.0, 0.0)

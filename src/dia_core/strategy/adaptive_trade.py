@@ -40,6 +40,11 @@ class AdaptiveParams:
         max_boost : amplification max de la prob par score
         k_atr_min : k_atr en régime calme
         k_atr_max : k_atr en régime explosif
+
+    Args:
+
+    Returns:
+
     """
 
     base_prob: float = 0.10
@@ -49,6 +54,16 @@ class AdaptiveParams:
 
 
 def _interp(a: float, b: float, t: float) -> float:
+    """
+
+    Args:
+      a: float:
+      b: float:
+      t: float:
+
+    Returns:
+
+    """
     t2 = float(np.clip(t, 0.0, 1.0))
     return float(a + (b - a) * t2)
 
@@ -68,6 +83,17 @@ def decide_intent(
     - k_atr = interpolation entre [k_atr_min, k_atr_max] selon *score*.
 
     Returns: (intent|None, market, regime)
+
+    Args:
+      *:
+      df: pd.DataFrame:
+      symbol: str:
+      params: AdaptiveParams | None:  (Default value = None)
+      rng_seed: int | None:  (Default value = 42)
+      policy: BanditPolicy | None:  (Default value = None)
+
+    Returns:
+
     """
     params = params or AdaptiveParams()
     regime = compute_regime(df)

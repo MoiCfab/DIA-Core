@@ -19,4 +19,4 @@ from __future__ import annotations
 
 
 class RiskLimitExceededError(RuntimeError):
-    """Exception levee lorsqu'un ordre dépasse au moins une limite de risque (hard-stop)."""
+    """Erreur levée quand une limite de risque est dépassée."""

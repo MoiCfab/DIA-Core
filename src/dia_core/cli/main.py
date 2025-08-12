@@ -23,7 +23,7 @@ _MIN_REG_WINDOW = 5
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """ """
+    """Construit le parser CLI et sous-commandes."""
     parser = argparse.ArgumentParser("dia-core")
     parser.add_argument("--config", default="", help="Chemin du fichier de configuration JSON")
     sub = parser.add_subparsers(dest="cmd", required=False)
@@ -63,6 +63,7 @@ def _maybe_notify_telegram(msg: str) -> None:
 
     Args:
       msg: str:
+      msg: str:
 
     Returns:
 
@@ -92,6 +93,11 @@ def _maybe_write_monitor(
       k_atr: float:
       last_side: str | None:
       path: str:
+      symbol: str:
+      regime: dict[str:
+      k_atr: float:
+      last_side: str | None:
+      path: str:
 
     Returns:
 
@@ -116,6 +122,7 @@ def _handle_run(args: argparse.Namespace) -> int:
     """
 
     Args:
+      args: argparse.Namespace:
       args: argparse.Namespace:
 
     Returns:
@@ -169,6 +176,7 @@ def _handle_orchestrate(args: argparse.Namespace) -> int:
 
     Args:
       args: argparse.Namespace:
+      args: argparse.Namespace:
 
     Returns:
 
@@ -181,6 +189,7 @@ def _handle_orchestrate(args: argparse.Namespace) -> int:
         """
 
         Args:
+          sym: str:
           sym: str:
 
         Returns:
@@ -241,6 +250,7 @@ def _load_cfg(path: str) -> dict[str, Any] | None:
 
     Args:
       path: str:
+      path: str:
 
     Returns:
 
@@ -260,6 +270,7 @@ def _handle_default_from_config(args: argparse.Namespace) -> int:
 
     Args:
       args: argparse.Namespace:
+      args: argparse.Namespace:
 
     Returns:
 
@@ -277,6 +288,7 @@ def main(argv: list[str] | None = None) -> int:
     """
 
     Args:
+      argv: list[str] | None:  (Default value = None)
       argv: list[str] | None:  (Default value = None)
 
     Returns:

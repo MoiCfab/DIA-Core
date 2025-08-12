@@ -50,6 +50,7 @@ def load_config(path: str) -> AppConfig:
 
     Args:
       path: str:
+      path: str:
 
     Returns:
 

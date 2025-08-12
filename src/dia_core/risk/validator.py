@@ -32,6 +32,11 @@ class ValidationResult(BaseModel):
     Attributes :
         allowed : True si l'ordre est autorisé, False sinon.
         reason : Raison du rejet si applicable.
+
+    Args:
+
+    Returns:
+
     """
 
     allowed: bool
@@ -48,6 +53,11 @@ class RiskCheckParams:
         daily_loss_pct : Perte réalisée du jour (en % de l'equite).
         drawdown_pct : Drawdown courant (en % de l'equite).
         orders_last_min : Nombre d'ordres passes sur la dernière minute.
+
+    Args:
+
+    Returns:
+
     """
 
     current_exposure_pct: float
@@ -62,10 +72,16 @@ def validate_order(limits: ConfigRiskLimits, params: RiskCheckParams) -> None:
 
     Args :
         limits : Configuration des limites de risque.
-        params : Mesures actuelles et projetées du portefeuille.
 
-    Raises :
-        RiskLimitExceededError : Si une limite est dépassée.
+    Args:
+      limits: ConfigRiskLimits:
+      params: RiskCheckParams:
+
+    Returns:
+
+    Raises:
+      RiskLimitExceededError: Si une limite est dépassée
+
     """
     if params.projected_exposure_pct > limits.max_exposure_pct:
         raise RiskLimitExceededError(

@@ -40,6 +40,8 @@ class SchedulerOverloadError(RuntimeError):
 
 @dataclass(frozen=True)
 class SystemQuotas:
+    """ """
+
     max_cpu_pct: float = 85.0
     max_ram_pct: float = 85.0
     check_interval_s: float = 2.0
@@ -47,12 +49,16 @@ class SystemQuotas:
 
 @dataclass(frozen=True)
 class RetryPolicy:
+    """ """
+
     max_retries: int = 2
     base_backoff_s: float = 0.5  # backoff exponentiel
 
 
 @dataclass(frozen=True)
 class JobResult:
+    """ """
+
     symbol: str
     ok: bool
     attempts: int
@@ -62,12 +68,22 @@ class JobResult:
 
 @dataclass(frozen=True)
 class SchedulerConfig:
+    """ """
+
     max_workers: int = 2
     quotas: SystemQuotas = field(default_factory=SystemQuotas)
     retry: RetryPolicy = field(default_factory=RetryPolicy)
 
 
 def _sys_ok(quotas: SystemQuotas) -> bool:
+    """
+
+    Args:
+      quotas: SystemQuotas:
+
+    Returns:
+
+    """
     if psutil is None:
         return True
     cpu: float = float(psutil.cpu_percent(interval=None))
@@ -76,6 +92,15 @@ def _sys_ok(quotas: SystemQuotas) -> bool:
 
 
 def _backoff_sleep(base: float, n: int) -> None:
+    """
+
+    Args:
+      base: float:
+      n: int:
+
+    Returns:
+
+    """
     sleep(base * (2 ** max(0, n)))
 
 
@@ -85,6 +110,18 @@ def _run_one(
     retry: RetryPolicy,
     quotas: SystemQuotas,
 ) -> JobResult:
+    """
+
+    Args:
+      symbol: str:
+      fn: Callable[[str]:
+      None]:
+      retry: RetryPolicy:
+      quotas: SystemQuotas:
+
+    Returns:
+
+    """
     start = monotonic()
     err: str | None = None
     attempts = 0
@@ -115,12 +152,18 @@ def run_batch(
     """Exécute un lot de jobs.
 
     Args:
-        symbols: liste des paires à traiter
-        worker: fonction synchrone prenant un symbole et ne renvoyant rien
-        cfg: configuration du scheduler
+      symbols: liste des paires à traiter
+      worker: fonction synchrone prenant un symbole et ne renvoyant rien
+      cfg: configuration du scheduler
+      symbols: Sequence[str]:
+      *:
+      worker: Callable[[str]:
+      None]:
+      cfg: SchedulerConfig | None:  (Default value = None)
 
     Returns:
-        Liste de JobResult, dans l'ordre d'achèvement des jobs.
+      : Liste de JobResult, dans l'ordre d'achèvement des jobs.
+
     """
     cfg = cfg or SchedulerConfig()
 

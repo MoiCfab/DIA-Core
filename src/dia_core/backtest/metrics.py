@@ -34,6 +34,7 @@ def _downs(x: NDArray[np.float64]) -> NDArray[np.float64]:
 
     Args:
       x: NDArray[np.float64]:
+      x: NDArray[np.float64]:
 
     Returns:
 
@@ -45,6 +46,7 @@ def perf_from_equity(equity: NDArray[np.float64]) -> PerfStats:
     """
 
     Args:
+      equity: NDArray[np.float64]:
       equity: NDArray[np.float64]:
 
     Returns:

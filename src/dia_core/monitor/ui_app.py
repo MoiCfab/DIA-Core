@@ -24,6 +24,8 @@ from dataclasses import asdict, dataclass
 
 @dataclass(frozen=True)
 class UiState:
+    """État minimal affiché par l`UI (positions, PnL, régime)."""
+
     symbol: str
     regime: Mapping[str, float]
     k_atr: float
@@ -33,10 +35,31 @@ class UiState:
 def build_state(
     *, symbol: str, regime: Mapping[str, float], k_atr: float, last_side: str | None
 ) -> UiState:
+    """
+
+    Args:
+      *:
+      symbol: str:
+      regime: Mapping[str:
+      float]:
+      k_atr: float:
+      last_side: str | None:
+
+    Returns:
+
+    """
     return UiState(symbol=symbol, regime=dict(regime), k_atr=float(k_atr), last_side=last_side)
 
 
 def run(state: UiState) -> None:  # pragma: no cover - interface
+    """
+
+    Args:
+      state: UiState:
+
+    Returns:
+
+    """
     try:
         import streamlit as st  # type: ignore
     except Exception as e:  # streamlit absent

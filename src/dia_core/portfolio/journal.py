@@ -60,10 +60,12 @@ def open_db(path: str) -> sqlite3.Connection:
     """Cree ou ouvre la base SQLite et initialise le schema si necessaire.
 
     Args:
-        path: Chemin vers le fichier SQLite (.sqlite).
+      path: Chemin vers le fichier SQLite (.sqlite).
+      path: str:
 
     Returns:
-        Instance sqlite3.Connection ouverte en mode autocommit.
+      : Instance sqlite3.Connection ouverte en mode autocommit.
+
     """
     os.makedirs(os.path.dirname(path), exist_ok=True)
     conn = sqlite3.connect(path, isolation_level=None)
@@ -75,10 +77,16 @@ def insert_order(conn: sqlite3.Connection, row: dict[str, Any]) -> None:
     """Insere ou remplace une entree dans la table orders.
 
     Args:
-        conn: Connexion SQLite.
-        row: Dictionnaire contenant :
-            id, ts, symbol, side, type, qty, price, status, reason.
-            Les champs 'status' et 'reason' sont optionnels.
+      conn: Connexion SQLite.
+      row: Dictionnaire contenant :
+    id, ts, symbol, side, type, qty, price, status, reason.
+    Les champs 'status' et 'reason' sont optionnels.
+      conn: sqlite3.Connection:
+      row: dict[str:
+      Any]:
+
+    Returns:
+
     """
     conn.execute(
         "INSERT OR REPLACE INTO orders("
@@ -102,10 +110,17 @@ def log_event(conn: sqlite3.Connection, level: str, component: str, message: str
     """Ajoute un evenement dans la table events.
 
     Args:
-        conn: Connexion SQLite.
-        level: Niveau de log (INFO, WARNING, ERROR, etc.).
-        component: Nom du composant ou module.
-        message: Texte descriptif de l'evenement.
+      conn: Connexion SQLite.
+      level: Niveau de log (INFO, WARNING, ERROR, etc.).
+      component: Nom du composant ou module.
+      message: Texte descriptif de l'evenement.
+      conn: sqlite3.Connection:
+      level: str:
+      component: str:
+      message: str:
+
+    Returns:
+
     """
     conn.execute(
         "INSERT INTO events(ts, level, component, message) VALUES(?,?,?,?)",

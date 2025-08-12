@@ -22,15 +22,7 @@ from pydantic import BaseModel
 
 
 class Position(BaseModel):
-    """Representation d'une position ouverte sur un instrument.
-
-    Attributes:
-        symbol: Symbole de la paire ou de l'actif (ex: "BTC/EUR").
-        qty: Quantite de l'actif dans la position.
-        avg_price: Prix moyen d'entree.
-        side: Cote de la position ("long" ou "short").
-        unrealized_pnl: PnL latent (non realise) en devise quote.
-    """
+    """Representation d'une position ouverte sur un instrument."""
 
     symbol: str
     qty: float
@@ -40,15 +32,7 @@ class Position(BaseModel):
 
 
 class PortfolioSnapshot(BaseModel):
-    """Instantane global du portefeuille a un moment donne.
-
-    Attributes:
-        equity: Valeur totale (cash + positions).
-        cash: Montant disponible en cash.
-        positions: Liste des positions ouvertes.
-        max_drawdown_pct: Drawdown maximal atteint (en %).
-        exposure_pct: Pourcentage de capital expose sur le marche.
-    """
+    """Instantane global du portefeuille a un moment donne."""
 
     equity: float
     cash: float

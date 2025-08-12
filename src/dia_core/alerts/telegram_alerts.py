@@ -32,7 +32,7 @@ _HTTP_OK_MAX_EXCL: Final[int] = 300
 
 @dataclass(frozen=True)
 class TgConfig:
-    """ """
+    """Paramètres Telegram (token, chat_id, dry-run)."""
 
     token: str
     chat_id: str
@@ -40,7 +40,7 @@ class TgConfig:
 
 
 def load_config_from_env() -> TgConfig | None:
-    """ """
+    """Charge token/chat_id depuis les variables d`environnement."""
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat = os.environ.get("TELEGRAM_CHAT_ID")
     dry = os.environ.get("DIA_TELEGRAM_DRY_RUN", "1") != "0"
@@ -53,6 +53,8 @@ def build_payload(cfg: TgConfig, text: str) -> tuple[str, bytes]:
     """
 
     Args:
+      cfg: TgConfig:
+      text: str:
       cfg: TgConfig:
       text: str:
 
@@ -76,7 +78,10 @@ def send(cfg: TgConfig, text: str, *, transport: Callable[[str, bytes], int] | N
       *:
       transport: Callable[[str:
       bytes]:
-      int] | None:  (Default value = None)
+      int] | None: (Default value = None)
+      cfg: TgConfig:
+      text: str:
+      transport: Callable[[str:
 
     Returns:
 

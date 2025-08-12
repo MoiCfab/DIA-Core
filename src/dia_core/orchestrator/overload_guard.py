@@ -36,6 +36,11 @@ class OverloadGuard:
       - Envoie une alerte email detaillee pour signaler l'action.
       - L'appelant decide ensuite si cette reduction est conservee ou si
         le materiel est augmenté.
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, alerter: EmailAlerter, thresholds: Thresholds | None = None) -> None:
@@ -61,12 +66,16 @@ class OverloadGuard:
         Envoie un email pour signaler l'action.
 
         Args:
-            active_pairs: Liste des paires actuellement actives.
-            low_priority_pairs: Liste des paires consideres comme moins critiques.
-            avg_cycle_latency_ms: Latence moyenne d'un cycle de stratégie.
+          active_pairs: Liste des paires actuellement actives.
+          low_priority_pairs: Liste des paires consideres comme moins critiques.
+          avg_cycle_latency_ms: Latence moyenne d'un cycle de stratégie.
+          active_pairs: Sequence[str]:
+          low_priority_pairs: Sequence[str]:
+          avg_cycle_latency_ms: float:
 
         Returns:
-            Nouvelle liste de paires actives apres éventuelle reduction.
+          : Nouvelle liste de paires actives apres éventuelle reduction.
+
         """
         self.hm.sample(latency_ms=avg_cycle_latency_ms)
         decision = self.hm.evaluate(active_pairs, low_priority_pairs)

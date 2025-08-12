@@ -29,7 +29,7 @@ from dia_core.strategy.adaptive_trade import AdaptiveParams, decide_intent
 
 @dataclass(frozen=True)
 class BTConfig:
-    """ """
+    """Paramètres du backtest (fenêtre, fees, seed)."""
 
     initial_equity: float = 10_000.0
     symbol: str = "BTC/EUR"
@@ -38,7 +38,7 @@ class BTConfig:
 
 @dataclass(frozen=True)
 class BTResult:
-    """ """
+    """Résultats de backtest (équité et métriques)."""
 
     equity: NDArray[np.float64]
     positions: NDArray[np.float64]
@@ -52,7 +52,14 @@ def run(
     decide: Callable[..., tuple[OrderIntent | None, MarketSnapshot, RegimeVector]] = decide_intent,
     params: AdaptiveParams | None = None,
 ) -> BTResult:
-    """
+    """Args:
+      df: pd.DataFrame:
+      *:
+      cfg: BTConfig | None:  (Default value = None)
+      decide: Callable[...:
+      tuple[OrderIntent | None:
+      MarketSnapshot:
+      RegimeVector]]:  (Default value = decide_intent)
 
     Args:
       df: pd.DataFrame:
@@ -65,6 +72,7 @@ def run(
       params: AdaptiveParams | None:  (Default value = None)
 
     Returns:
+
 
     """
     cfg = cfg or BTConfig()

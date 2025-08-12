@@ -30,6 +30,11 @@ class RiskLimits(BaseModel):
         max_exposure_pct : Exposition maximale sur le marché (en % d'equite).
         risk_per_trade_pct : Risque maximum alloué par trade (en % d'equite).
         max_orders_per_min : Nombre maximum d'ordres autorisés par minute.
+
+    Args:
+
+    Returns:
+
     """
 
     max_daily_loss_pct: float = 2.0

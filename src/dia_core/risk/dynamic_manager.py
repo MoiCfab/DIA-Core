@@ -22,12 +22,22 @@ from dia_core.market_state.regime_vector import RegimeVector
 
 @dataclass(frozen=True)
 class DynamicRisk:
+    """Ajuste SL/TP/sizing selon le régime et les limites."""
+
     k_atr: float
     risk_per_trade_pct: float
     max_exposure_pct: float
 
 
 def adjust(reg: RegimeVector) -> DynamicRisk:
+    """
+
+    Args:
+      reg: RegimeVector:
+
+    Returns:
+
+    """
     # Interpolations linéaires sur [0,1]
     k_atr = 1.2 + (3.5 - 1.2) * reg.score
     risk_per = 0.25 + (1.0 - 0.25) * reg.volatility  # plus de vol -> plus d'opportunités maîtrisées

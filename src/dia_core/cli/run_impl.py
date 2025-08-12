@@ -16,6 +16,7 @@ def get_last_window(symbol: str) -> DataFrame | None:  # pragma: no cover
 
     Args:
       symbol: str:
+      symbol: str:
 
     Returns:
 
@@ -40,6 +41,9 @@ def run_once(
 
     Args:
       *:
+      mode: str:
+      symbol: str:
+      k_atr_override: float | None:  (Default value = None)
       mode: str:
       symbol: str:
       k_atr_override: float | None:  (Default value = None)

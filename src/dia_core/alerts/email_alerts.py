@@ -29,7 +29,7 @@ import ssl
 
 @dataclass
 class EmailConfig:
-    """ """
+    """Paramètres Email (smtp, password, recipients)."""
 
     smtp_host: str
     smtp_port: int = 587
@@ -66,6 +66,8 @@ class EmailAlerter:
         Args:
           subject: str:
           body: str:
+          subject: str:
+          body: str:
 
         Returns:
 
@@ -81,6 +83,8 @@ class EmailAlerter:
         """
 
         Args:
+          subject: str:
+          body: str:
           subject: str:
           body: str:
 
@@ -120,6 +124,8 @@ class EmailAlerter:
         Args:
           subject: str:
           body: str:
+          subject: str:
+          body: str:
 
         Returns:
 
@@ -132,7 +138,7 @@ class EmailAlerter:
             return False
 
     def send_test(self) -> bool:
-        """ """
+        """Envoie un email de test et retourne True si succès."""
         return self.try_send(
             "[DIA-Core] Test d'alerte email",
             "Ceci est un email de test envoyé par DIA-Core pour vérifier la configuration SMTP.",

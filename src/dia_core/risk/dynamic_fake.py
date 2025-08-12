@@ -17,6 +17,17 @@ def build_risk_context(
     open_notional: float | None = None,
     fallback_orders_last_min: int | None = None,
 ) -> RiskContext:
+    """
+
+    Args:
+      *:
+      equity: float:
+      open_notional: float | None:  (Default value = None)
+      fallback_orders_last_min: int | None:  (Default value = None)
+
+    Returns:
+
+    """
     expo = _expo(equity, open_notional or 0.0)
     olm = fallback_orders_last_min if fallback_orders_last_min is not None else _olm()
     return RiskContext(equity=equity, current_exposure_pct=expo, orders_last_min=olm)

@@ -122,6 +122,8 @@ class Executor:
         Args:
           intent: OrderIntent:
           equity: float:
+          intent: OrderIntent:
+          equity: float:
 
         Returns:
 

@@ -32,14 +32,7 @@ MAX_HISTORY = 128
 
 @dataclass
 class LoadSnapshot:
-    """Instantane de charge mesure a un instant donne.
-
-    Attributes:
-        ts: Horodatage en secondes (time.time()).
-        cpu_pct: Utilisation CPU en pourcentage.
-        ram_pct: Utilisation RAM en pourcentage.
-        latency_ms: Latence moyenne observee (ms) pour un cycle de strategie.
-    """
+    """Instantane de charge mesure a un instant donne."""
 
     ts: float
     cpu_pct: float
@@ -49,15 +42,7 @@ class LoadSnapshot:
 
 @dataclass
 class Thresholds:
-    """Seuils de charge et conditions d'alerte.
-
-    Attributes:
-        cpu_pct: Pourcentage CPU maximum tolere.
-        ram_pct: Pourcentage RAM maximum tolere.
-        latency_ms: Latence maximum toleree (ms).
-        sustain_windows: Nombre de mesures consecutives depassant les seuils
-            necessaire pour declencher une alerte.
-    """
+    """Seuils de charge et conditions d'alerte."""
 
     cpu_pct: float = 90.0
     ram_pct: float = 90.0
@@ -67,13 +52,7 @@ class Thresholds:
 
 @dataclass
 class OverloadDecision:
-    """Decision retournee apres evaluation de la charge.
-
-    Attributes:
-        overloaded: True si surcharge detectee.
-        reason: Description de la raison de la surcharge.
-        drop_pairs: Nombre de paires non prioritaires a desactiver.
-    """
+    """Decision retournee apres evaluation de la charge."""
 
     overloaded: bool
     reason: str | None
@@ -87,6 +66,11 @@ class HealthMonitor:
     - Accepte une mesure externe de latence en ms.
     - Declenche une alerte si un depassement de seuil est constate pendant
       un nombre de cycles consecutifs defini par sustain_windows.
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, thresholds: Thresholds, sample_period_s: float = 30.0) -> None:
@@ -105,10 +89,12 @@ class HealthMonitor:
         """Effectue une mesure de charge et l'ajoute a l'historique.
 
         Args:
-            latency_ms: Latence mesuree par le moteur (optionnel).
+          latency_ms: Latence mesuree par le moteur (optionnel).
+          latency_ms: float:  (Default value = 0.0)
 
         Returns:
-            Un objet LoadSnapshot representant la mesure.
+          : Un objet LoadSnapshot representant la mesure.
+
         """
         now = time.time()
         cpu = psutil.cpu_percent(interval=None) if psutil else 0.0
@@ -126,14 +112,16 @@ class HealthMonitor:
         """Evalue l'etat de charge et determine si une reduction est necessaire.
 
         Args:
-            active_pairs: Liste des paires actuellement actives.
-            low_priority: Liste des paires non prioritaires.
+          active_pairs: Liste des paires actuellement actives.
+          low_priority: Liste des paires non prioritaires.
+          active_pairs: Sequence[str]:
+          low_priority: Sequence[str]:
 
         Returns:
-            Une instance OverloadDecision avec:
-              - overloaded=True si surcharge persistante detectee.
-              - reason de l'alerte.
-              - drop_pairs = nombre de paires a desactiver.
+          Une instance OverloadDecision avec: - overloaded=True si surcharge persistante detectee.
+          - reason de l'alerte.
+          - drop_pairs = nombre de paires a desactiver.
+
         """
         if not self._history:
             return OverloadDecision(False, None, 0)

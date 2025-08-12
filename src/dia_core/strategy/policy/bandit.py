@@ -28,10 +28,14 @@ class ArmConfig:
 
 @dataclass
 class BanditPolicy:
-    """
-    Bandit bayésien (Thompson sampling) non-contextuel, à bras discrets.
+    """Bandit bayésien (Thompson sampling) non-contextuel, à bras discrets.
     Récompense ∈ R (PnL/équité, etc.) est ramenée dans [0,1] via tanh.
     Persistance JSON sur disque (Logs/policy.json par défaut).
+
+    Args:
+
+    Returns:
+
     """
 
     arms: list[ArmConfig]
@@ -45,6 +49,14 @@ class BanditPolicy:
 
     @staticmethod
     def default(storage: str | None = None) -> BanditPolicy:
+        """
+
+        Args:
+          storage: str | None:  (Default value = None)
+
+        Returns:
+
+        """
         arms = [
             # Calme
             ArmConfig(base_prob=0.05, max_boost=0.35, k_atr_min=1.2, k_atr_max=2.0),
@@ -63,7 +75,14 @@ class BanditPolicy:
     # ---------- API principale ----------
 
     def select(self, rng: np.random.Generator | None = None) -> tuple[int, dict[str, float]]:
-        """Tire un bras via Thompson sampling, avec epsilon-exploration."""
+        """Tire un bras via Thompson sampling, avec epsilon-exploration.
+
+        Args:
+          rng: np.random.Generator | None:  (Default value = None)
+
+        Returns:
+
+        """
         rng = rng or np.random.default_rng()
         if rng.random() < float(self.epsilon):
             idx = int(rng.integers(0, len(self.arms)))
@@ -80,9 +99,15 @@ class BanditPolicy:
         }
 
     def update(self, arm_idx: int, reward: float) -> None:
-        """
-        Met à jour alpha/beta à partir d'une récompense réelle (PnL relatif).
+        """Met à jour alpha/beta à partir d'une récompense réelle (PnL relatif).
         reward ∈ R → p = 0..1 via 0.5*(1+tanh(reward/scale)).
+
+        Args:
+          arm_idx: int:
+          reward: float:
+
+        Returns:
+
         """
         p = float(0.5 * (1.0 + math.tanh(reward / self.reward_scale)))
         self.alpha[arm_idx] += p
@@ -92,6 +117,7 @@ class BanditPolicy:
     # ---------- Persistance ----------
 
     def save(self) -> None:
+        """ """
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
         data: dict[str, Any] = {
             "arms": [arm.__dict__ for arm in self.arms],
@@ -105,6 +131,14 @@ class BanditPolicy:
 
     @classmethod
     def load(cls, path: str | Path) -> BanditPolicy:
+        """
+
+        Args:
+          path: str | Path:
+
+        Returns:
+
+        """
         p = Path(path)
         if not p.exists():
             return cls.default(str(p))

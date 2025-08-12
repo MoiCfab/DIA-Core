@@ -44,6 +44,9 @@ def cache_path(cache_dir: str, pair: str, interval: int) -> Path:
       cache_dir: str:
       pair: str:
       interval: int:
+      cache_dir: str:
+      pair: str:
+      interval: int:
 
     Returns:
 
@@ -81,6 +84,9 @@ def load_cache(cache_dir: str, pair: str, interval: int) -> pd.DataFrame | None:
       cache_dir: str:
       pair: str:
       interval: int:
+      cache_dir: str:
+      pair: str:
+      interval: int:
 
     Returns:
 
@@ -111,6 +117,10 @@ def save_cache(cache_dir: str, pair: str, interval: int, df: pd.DataFrame) -> No
         INFO si l`écriture est ignorée (absence de moteur Parquet, erreur de format).
 
     Args:
+      cache_dir: str:
+      pair: str:
+      interval: int:
+      df: pd.DataFrame:
       cache_dir: str:
       pair: str:
       interval: int:

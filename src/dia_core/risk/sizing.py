@@ -35,6 +35,11 @@ class SizingParams:
         min_qty : Quantité minimale autorisée par l'exchange.
         min_notional : Valeur notionnelle minimale (prix * quantité).
         qty_decimals : Nombre de décimales autorisées pour la quantité.
+
+    Args:
+
+    Returns:
+
     """
 
     equity: float
@@ -55,11 +60,14 @@ def compute_position_size(params: SizingParams) -> float:
     valeur notionnelle minimale sont appliquées.
 
     Args :
-        params : Instance de SizingParams contenant tous les paramètres necessaires.
 
-    Returns :
-        Taille de position (quantité) arrondie aux décimales autorisées.
-        Retourne 0.0 si les conditions minimales ne sont pas remplies.
+    Args:
+      params: SizingParams:
+
+    Returns:
+      Taille de position (quantité) arrondie aux décimales autorisées.
+      Retourne 0.0 si les conditions minimales ne sont pas remplies.
+
     """
     small: Final[float] = 1e-12
     if params.price <= 0 or params.atr <= 0 or params.equity <= 0:
