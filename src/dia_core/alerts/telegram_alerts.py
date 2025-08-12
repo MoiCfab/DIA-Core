@@ -19,10 +19,10 @@ Auteur : DYXIUM Invest / D.I.A. Core
 """
 from __future__ import annotations
 
-import json
-import os
 from collections.abc import Callable
 from dataclasses import dataclass
+import json
+import os
 from typing import Final
 
 _API_URL_TMPL: Final[str] = "https://api.telegram.org/bot{token}/sendMessage"

@@ -4,14 +4,13 @@
 from __future__ import annotations
 
 import argparse
-import json
-import os
 from collections.abc import Sequence
 from contextlib import suppress
+import json
+import os
 from typing import Any, cast
 
-from dia_core.alerts.telegram_alerts import load_config_from_env
-from dia_core.alerts.telegram_alerts import send as tg_send
+from dia_core.alerts.telegram_alerts import load_config_from_env, send as tg_send
 from dia_core.logging.setup import setup_logging
 from dia_core.market_state.regime_vector import compute_regime
 from dia_core.monitor.ui_app import build_state
@@ -65,7 +64,12 @@ def _maybe_notify_telegram(msg: str) -> None:
 
 
 def _maybe_write_monitor(
-    symbol: str, *, regime: dict[str, float], k_atr: float, last_side: str | None, path: str
+    symbol: str,
+    *,
+    regime: dict[str, float],
+    k_atr: float,
+    last_side: str | None,
+    path: str,
 ) -> None:
     if not path:
         return
@@ -148,7 +152,10 @@ def _handle_orchestrate(args: argparse.Namespace) -> int:
             )
             _maybe_notify_telegram(msg)
         if args.monitor_file:
-            with suppress(Exception), open(args.monitor_file, "a", encoding="utf-8") as f:
+            with (
+                suppress(Exception),
+                open(args.monitor_file, "a", encoding="utf-8") as f,
+            ):
                 json.dump({"symbol": sym, "last_side": side, "k_atr": k_atr_override}, f)
                 f.write("\n")
 

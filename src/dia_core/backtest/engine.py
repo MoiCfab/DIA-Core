@@ -17,13 +17,14 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
+
 from dia_core.backtest.metrics import PerfStats, perf_from_equity
 from dia_core.exec.pre_trade import MarketSnapshot
 from dia_core.kraken.types import OrderIntent
 from dia_core.market_state.regime_vector import RegimeVector
 from dia_core.strategy.adaptive_trade import AdaptiveParams, decide_intent
-from numpy.typing import NDArray
 
 
 @dataclass(frozen=True)

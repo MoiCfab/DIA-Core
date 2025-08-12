@@ -22,6 +22,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+
 from dia_core.exec.pre_trade import MarketSnapshot
 from dia_core.kraken.types import OrderIntent
 from dia_core.market_state.regime_vector import RegimeVector, compute_regime
@@ -91,6 +92,11 @@ def decide_intent(
 
     side = "buy" if regime.momentum >= _MOMENTUM_BUY_THRESHOLD else "sell"
     intent = OrderIntent(
-        symbol=symbol, side=side, type="limit", qty=0.0, limit_price=price, time_in_force="GTC"
+        symbol=symbol,
+        side=side,
+        type="limit",
+        qty=0.0,
+        limit_price=price,
+        time_in_force="GTC",
     )
     return intent, market, regime

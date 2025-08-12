@@ -23,8 +23,8 @@ Auteur : DYXIUM Invest / D.I.A. Core
 from __future__ import annotations
 
 import logging
-import uuid
 from typing import Literal
+import uuid
 
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.exec.pre_trade import pre_trade_checks

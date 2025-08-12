@@ -41,7 +41,11 @@ def render_subject(mode: str, items: list[SymbolSummary]) -> str:
 
 def render_text(mode: str, items: list[SymbolSummary]) -> str:
     ts = datetime.now(UTC).strftime("%Y-%m-%d %H:%MZ")
-    lines = [f"DIA-Core — {mode} — {ts}", f"Symboles: {', '.join(i.symbol for i in items)}", ""]
+    lines = [
+        f"DIA-Core — {mode} — {ts}",
+        f"Symboles: {', '.join(i.symbol for i in items)}",
+        "",
+    ]
     for it in items:
         line1 = (
             f"{it.symbol}: side={it.side or '-'} | k_atr={it.k_atr:.2f}"

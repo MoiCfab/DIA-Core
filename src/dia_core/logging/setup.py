@@ -21,10 +21,10 @@ Auteur : DYXIUM Invest / D.I.A. Core
 from __future__ import annotations
 
 import contextlib
+from datetime import UTC, datetime
 import gzip
 import json
 import logging
-from datetime import UTC, datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any

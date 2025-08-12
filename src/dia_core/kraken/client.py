@@ -21,11 +21,11 @@ Auteur : DYXIUM Invest / D.I.A. Core
 from __future__ import annotations
 
 import base64
+from dataclasses import dataclass
 import hashlib
 import hmac
 import logging
 import time
-from dataclasses import dataclass
 from types import TracebackType
 from typing import Any, Literal
 from urllib.parse import urlencode

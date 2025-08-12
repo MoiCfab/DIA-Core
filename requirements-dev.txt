@@ -7,3 +7,10 @@ typing-extensions==4.12.2
 pandas-stubs==2.2.2.240807
 pydantic-settings==2.4.0
 pytest-cov==5.0.0
+pylint
+coverage
+xenon
+bandit
+semgrep
+pip-audit
+deptry

@@ -20,9 +20,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from pydantic import BaseModel
+
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.risk.errors import RiskLimitExceededError
-from pydantic import BaseModel
 
 
 class ValidationResult(BaseModel):

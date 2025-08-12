@@ -17,9 +17,9 @@ Auteur : DYXIUM Invest / D.I.A. Core
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 import contextlib
 import logging
-from collections.abc import Sequence
 
 from dia_core.alerts.email_alerts import EmailAlerter
 from dia_core.monitor.health_monitor import HealthMonitor, Thresholds

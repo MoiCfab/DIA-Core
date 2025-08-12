@@ -24,8 +24,8 @@ from dataclasses import dataclass
 from typing import Final, cast
 
 import numpy as np
-import pandas as pd
 from numpy.typing import NDArray
+import pandas as pd
 
 _MIN_MOMENTUM_POINTS: Final[int] = 3
 

@@ -19,12 +19,12 @@ Auteur : DYXIUM Invest / D.I.A. Core
 
 from __future__ import annotations
 
-import logging
-import smtplib
-import ssl
 from collections.abc import Iterable
 from dataclasses import dataclass
 from email.message import EmailMessage
+import logging
+import smtplib
+import ssl
 
 
 @dataclass
@@ -80,7 +80,10 @@ class EmailAlerter:
         else:
             # SSL direct (ex: Gmail 465)
             with smtplib.SMTP_SSL(
-                self.cfg.smtp_host, self.cfg.smtp_port, context=context, timeout=self.cfg.timeout
+                self.cfg.smtp_host,
+                self.cfg.smtp_port,
+                context=context,
+                timeout=self.cfg.timeout,
             ) as s:
                 if self.cfg.username and self.cfg.password:
                     s.login(self.cfg.username, self.cfg.password)

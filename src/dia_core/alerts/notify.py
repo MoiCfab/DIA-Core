@@ -3,13 +3,20 @@
 
 from __future__ import annotations
 
-import os
 from contextlib import suppress
+import os
 
 from dia_core.alerts.email_alerts import EmailAlerter, EmailConfig
-from dia_core.alerts.formatters import SymbolSummary, render_markdown, render_subject, render_text
-from dia_core.alerts.telegram_alerts import load_config_from_env as load_tg
-from dia_core.alerts.telegram_alerts import send as tg_send
+from dia_core.alerts.formatters import (
+    SymbolSummary,
+    render_markdown,
+    render_subject,
+    render_text,
+)
+from dia_core.alerts.telegram_alerts import (
+    load_config_from_env as load_tg,
+    send as tg_send,
+)
 
 
 def _email_cfg_from_env() -> EmailConfig | None:

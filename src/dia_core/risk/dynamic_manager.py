@@ -33,5 +33,7 @@ def adjust(reg: RegimeVector) -> DynamicRisk:
     risk_per = 0.25 + (1.0 - 0.25) * reg.volatility  # plus de vol -> plus d'opportunités maîtrisées
     max_exp = 20.0 + (60.0 - 20.0) * reg.momentum  # marché porteur autorise + d'expo
     return DynamicRisk(
-        k_atr=float(k_atr), risk_per_trade_pct=float(risk_per), max_exposure_pct=float(max_exp)
+        k_atr=float(k_atr),
+        risk_per_trade_pct=float(risk_per),
+        max_exposure_pct=float(max_exp),
     )

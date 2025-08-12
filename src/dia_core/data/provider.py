@@ -2,9 +2,9 @@
 # All Rights Reserved — Usage without permission is prohibited
 from __future__ import annotations
 
+from collections.abc import Mapping
 import json
 import time
-from collections.abc import Mapping
 from typing import Any, Final
 
 import httpx
@@ -66,7 +66,9 @@ def load_ohlc_window(symbol: str, window: int = 200, *, interval_min: int = 1) -
         count = rng.integers(50, 200, size=window)
         ts = np.arange(now - (window - 1) * step, now + 1, step, dtype=int)
         return pd.DataFrame(
-            np.c_[ts, open_, high, low, close, vwap, volume, count], columns=_COLS, dtype=float
+            np.c_[ts, open_, high, low, close, vwap, volume, count],
+            columns=_COLS,
+            dtype=float,
         )
 
 
