@@ -14,13 +14,17 @@ from typing import Any, cast
 
 from dia_core.alerts.formatters import SymbolSummary
 from dia_core.alerts.notify import notify_summary
-from dia_core.alerts.telegram_alerts import load_config_from_env, send as tg_send
-from dia_core.cli.run_impl import get_last_window, run_once
+from dia_core.cli.run_impl import run_once
 from dia_core.logging.setup import setup_logging
-from dia_core.market_state.regime_vector import compute_regime
-from dia_core.monitor.ui_app import build_state
 from dia_core.orchestrator.scheduler import SchedulerConfig, run_batch
-from dia_core.risk.dynamic_manager import adjust as adjust_dynamic_risk
+
+# Import helper functions to keep CLI handlers concise.
+from dia_core.cli.helpers import (
+    compute_dynamic_risk_info,
+    send_trade_notification,
+    write_monitor_state,
+    append_monitor_line,
+)
 
 _MIN_REG_WINDOW = 5
 
@@ -62,20 +66,23 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _maybe_notify_telegram(msg: str) -> None:
-    """
+    """Envoie `msg` sur Telegram si la config env est présente.
 
     Args:
-      msg: str:
-      msg: str:
-
-    Returns:
-
+        msg: Texte à envoyer.
     """
-    cfg = load_config_from_env()
-    if not cfg:
+    # import paresseux pour ne pas forcer la dépendance en l'absence de config
+    from dia_core.alerts.telegram_alerts import (
+        load_config_from_env,
+        TgConfig,
+        send,
+    )  # pylint: disable=import-outside-toplevel
+
+    cfg: TgConfig | None = load_config_from_env()
+    if not getattr(cfg, "token", None) or not getattr(cfg, "chat_id", None):
         return
-    with suppress(Exception):
-        tg_send(cfg, msg)
+    if cfg is not None:
+        send(cfg, msg)
 
 
 def _maybe_write_monitor(
@@ -105,20 +112,9 @@ def _maybe_write_monitor(
     Returns:
 
     """
-    if not path:
-        return
-    with suppress(Exception):
-        state = build_state(symbol=symbol, regime=regime, k_atr=k_atr, last_side=last_side)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(
-                {
-                    "symbol": state.symbol,
-                    "regime": state.regime,
-                    "k_atr": state.k_atr,
-                    "last_side": state.last_side,
-                },
-                f,
-            )
+    # Deprecated wrapper retained for backwards compatibility. Delegates
+    # to the helpers module for monitor persistence.
+    write_monitor_state(symbol, regime, k_atr, last_side, path)
 
 
 def _handle_run(args: argparse.Namespace) -> int:
@@ -132,40 +128,23 @@ def _handle_run(args: argparse.Namespace) -> int:
 
     """
 
-    dyn = bool(args.dynamic_risk)
-    mon_path = str(args.monitor_file or "")
-    notify = bool(args.telegram)
+    dyn: bool = bool(args.dynamic_risk)
+    mon_path: str = str(args.monitor_file or "")
+    notify_enabled: bool = bool(args.telegram)
 
-    if not dyn and not mon_path and not notify:
+    # Fast path when no dynamic risk, no monitoring and no notification.
+    if not dyn and not mon_path and not notify_enabled:
         ok, _ = run_once(mode=args.mode, symbol=args.symbol)
         return 0 if ok else 1
 
-    k_atr_override: float | None = None
-    regime_dict: dict[str, float] = {}
-    with suppress(Exception):
-        window = get_last_window(symbol=args.symbol)
-        if dyn and window is not None and len(window) > _MIN_REG_WINDOW:
-            reg = compute_regime(window)
-            regime_dict = {
-                "volatility": reg.volatility,
-                "momentum": reg.momentum,
-                "volume": reg.volume,
-                "entropy": reg.entropy,
-                "spread": reg.spread,
-                "score": reg.score,
-            }
-            k_atr_override = float(adjust_dynamic_risk(reg).k_atr)
-
+    k_atr_override, regime_dict = compute_dynamic_risk_info(args.symbol, dyn)
     ok, side = run_once(mode=args.mode, symbol=args.symbol, k_atr_override=k_atr_override)
-    if notify:
-        msg = (
-            f"DIA-Core {args.mode} {args.symbol} — side={side} "
-            f"k_atr={k_atr_override if k_atr_override is not None else 'auto'}"
-        )
-        _maybe_notify_telegram(msg)
-    _maybe_write_monitor(
+    # Send a notification if requested.
+    send_trade_notification(args.mode, args.symbol, side, k_atr_override, notify_enabled)
+    # Persist monitor state if a file path was supplied.
+    write_monitor_state(
         args.symbol,
-        regime=regime_dict,
+        regime_dict,
         k_atr=(k_atr_override or 0.0),
         last_side=side,
         path=mon_path,
@@ -184,53 +163,53 @@ def _handle_orchestrate(args: argparse.Namespace) -> int:
 
     """
 
+    # Split the symbols argument into individual entries, ignoring
+    # whitespace and empty strings.
     syms: Sequence[str] = [s.strip() for s in str(args.symbols).split(",") if s.strip()]
 
-    def _worker(sym: str) -> None:
-        """
+    def worker(symbol: str) -> None:
+        """Process a single symbol during orchestration.
+
+        The worker encapsulates the per symbol logic: computing a
+        dynamic k_ATR override when requested, running the trading loop
+        once, sending a notification and appending a line to the
+        monitor file. It intentionally avoids capturing the outer
+        ``args`` structure directly, instead copying only the values
+        it needs into local variables to aid type checking and reduce
+        complexity.
 
         Args:
-          sym: str:
-          sym: str:
-
-        Returns:
-
+            symbol: The trading pair to process.
         """
-        k_atr_override: float | None = None
-        if args.dynamic_risk:
-            with suppress(Exception):
-                window = get_last_window(symbol=sym)
-                if window is not None and len(window) > _MIN_REG_WINDOW:
-                    reg = compute_regime(window)
-                    k_atr_override = float(adjust_dynamic_risk(reg).k_atr)
-        ok, side = run_once(mode=args.mode, symbol=sym, k_atr_override=k_atr_override)
-        _ = ok
-        if args.telegram:
-            msg = (
-                f"DIA-Core {args.mode} {sym} — side={side} "
-                f"k_atr={k_atr_override if k_atr_override is not None else 'auto'}"
-            )
-            _maybe_notify_telegram(msg)
-        if args.monitor_file:
-            with (
-                suppress(Exception),
-                open(args.monitor_file, "a", encoding="utf-8") as f,
-            ):
-                json.dump({"symbol": sym, "last_side": side, "k_atr": k_atr_override}, f)
-                f.write("\n")
+        dynamic_enabled = bool(args.dynamic_risk)
+        telegram_enabled = bool(args.telegram)
+        monitor_path = str(args.monitor_file or "")
+
+        # Compute a dynamic risk override for this symbol if requested.
+        k_atr_override, _ = compute_dynamic_risk_info(symbol, dynamic_enabled)
+        ok, side = run_once(mode=args.mode, symbol=symbol, k_atr_override=k_atr_override)
+        _ = ok  # Result is ignored for orchestration flows.
+        # Send Telegram notification if enabled.
+        send_trade_notification(args.mode, symbol, side, k_atr_override, telegram_enabled)
+        # Append the result to the monitor file for aggregation.
+        append_monitor_line(symbol, side, k_atr_override, monitor_path)
 
     cfg = SchedulerConfig(max_workers=int(args.max_workers))
-    run_batch(syms, worker=_worker, cfg=cfg)
-    # Récap global (pour notifs)
-    with suppress(Exception):  # pragma: no cover
+    # Execute the batch using the scheduler. The scheduler will report
+    # individual job errors via its returned results.
+    run_batch(syms, worker=worker, cfg=cfg)
 
+    # After the batch we send a global summary notification via the
+    # existing API. The summary currently contains only a placeholder
+    # structure; additional information could be propagated here.
+    with suppress(Exception):  # pragma: no cover
         summaries: list[SymbolSummary] = []
         sym = args.symbol
         summaries.append(
             SymbolSummary(
                 symbol=sym,
-                side=None,  # on peut stocker le dernier side si tu veux le propager
-                k_atr=None,  # idem
+                side=None,
+                k_atr=None,
                 sharpe=None,
                 sortino=None,
                 max_dd=None,

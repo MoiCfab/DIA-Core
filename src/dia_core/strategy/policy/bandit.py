@@ -10,7 +10,7 @@ import json
 import math
 from pathlib import Path
 import time
-from typing import Any, Final
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -44,8 +44,7 @@ class BanditPolicy:
     epsilon: float = 0.05  # exploration minimale
     reward_scale: float = 0.01  # ~1% de PnL -> reward ~ 0.73
     storage_path: Path = Path("Logs/policy.json")
-
-    MIN_AB: Final[float] = 1e-3
+    min_ab: int = 2
 
     @staticmethod
     def default(storage: str | None = None) -> BanditPolicy:
@@ -88,7 +87,7 @@ class BanditPolicy:
             idx = int(rng.integers(0, len(self.arms)))
         else:
             # Beta(alpha, beta) ~ proba de 'succès' attendue
-            samples = rng.beta(self.alpha.clip(self.MIN_AB), self.beta.clip(self.MIN_AB))
+            samples = rng.beta(self.alpha.clip(self.min_ab), self.beta.clip(self.min_ab))
             idx = int(np.argmax(samples))
         arm = self.arms[idx]
         return idx, {

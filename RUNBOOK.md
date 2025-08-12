@@ -20,6 +20,13 @@ ruff check src tests --fix
 black src tests
 mypy src tests --strict --pretty --show-error-codes
 pytest -q -vv
+radon cc -s src
+pylint src --fail-under=10.0
+xenon --max-absolute B --max-modules A --max-average A src
+bandit -r src
+semgrep scan --config auto
+pip-audit
+deptry src
 
 # Fusionner dans main quand c’est prêt
 git checkout main

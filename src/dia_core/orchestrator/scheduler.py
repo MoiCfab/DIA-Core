@@ -143,39 +143,77 @@ def _run_one(
     return JobResult(symbol, False, attempts, monotonic() - start, err)
 
 
+def _run_batch_sequential(
+    symbols: Sequence[str], worker: Callable[[str], None], cfg: SchedulerConfig
+) -> list[JobResult]:
+    """Run a batch of jobs sequentially.
+
+    This helper encapsulates the sequential execution path. Each symbol
+    is processed one after another without any concurrency.
+
+    Args:
+        symbols: Collection of trading symbols to process.
+        worker: Function taking a symbol and performing the job.
+        cfg: Scheduler configuration providing retry and quota settings.
+
+    Returns:
+        A list of :class:`JobResult` objects corresponding to each job.
+    """
+    results: list[JobResult] = []
+    for sym in symbols:
+        results.append(_run_one(sym, worker, cfg.retry, cfg.quotas))
+    return results
+
+
+def _run_batch_parallel(
+    symbols: Sequence[str], worker: Callable[[str], None], cfg: SchedulerConfig
+) -> list[JobResult]:
+    """Run a batch of jobs in parallel using a thread pool.
+
+    Args:
+        symbols: Collection of trading symbols to process.
+        worker: Function taking a symbol and performing the job.
+        cfg: Scheduler configuration providing retry and quota settings.
+
+    Returns:
+        A list of :class:`JobResult` objects corresponding to each job
+        in the order in which they completed.
+    """
+    results: list[JobResult] = []
+    with ThreadPoolExecutor(max_workers=cfg.max_workers) as executor:
+        futures = {
+            executor.submit(_run_one, sym, worker, cfg.retry, cfg.quotas): sym for sym in symbols
+        }
+        for future in as_completed(futures):
+            results.append(future.result())
+    return results
+
+
 def run_batch(
     symbols: Sequence[str],
     *,
     worker: Callable[[str], None],
     cfg: SchedulerConfig | None = None,
 ) -> list[JobResult]:
-    """Exécute un lot de jobs.
+    """Execute a batch of jobs either sequentially or concurrently.
+
+    A thin wrapper around :func:`_run_batch_sequential` and
+    :func:`_run_batch_parallel` that chooses the appropriate execution
+    strategy based on ``cfg.max_workers``.
 
     Args:
-      symbols: liste des paires à traiter
-      worker: fonction synchrone prenant un symbole et ne renvoyant rien
-      cfg: configuration du scheduler
-      symbols: Sequence[str]:
-      *:
-      worker: Callable[[str]:
-      None]:
-      cfg: SchedulerConfig | None:  (Default value = None)
+        symbols: List of pairs to process.
+        worker: Synchronous function taking a symbol and returning
+            nothing. The scheduler wraps calls to this function with
+            retry and quota checking.
+        cfg: Scheduler configuration. When ``None`` a default
+            configuration is used.
 
     Returns:
-      : Liste de JobResult, dans l'ordre d'achèvement des jobs.
-
+        A list of :class:`JobResult` instances. Order of the results
+        corresponds to the order in which jobs completed.
     """
-    cfg = cfg or SchedulerConfig()
-
-    if cfg.max_workers <= 1:
-        out: list[JobResult] = []
-        for s in symbols:
-            out.append(_run_one(s, worker, cfg.retry, cfg.quotas))
-        return out
-
-    out2: list[JobResult] = []
-    with ThreadPoolExecutor(max_workers=cfg.max_workers) as ex:
-        futs = {ex.submit(_run_one, s, worker, cfg.retry, cfg.quotas): s for s in symbols}
-        for fut in as_completed(futs):
-            out2.append(fut.result())
-    return out2
+    config = cfg or SchedulerConfig()
+    if config.max_workers <= 1:
+        return _run_batch_sequential(symbols, worker, config)
+    return _run_batch_parallel(symbols, worker, config)

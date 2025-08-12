@@ -18,7 +18,6 @@ Auteur : DYXIUM Invest / D.I.A. Core
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -26,31 +25,19 @@ import pandas as pd
 from dia_core.exec.pre_trade import MarketSnapshot
 from dia_core.kraken.types import OrderIntent
 from dia_core.market_state.regime_vector import RegimeVector, compute_regime
+from dia_core.strategy.common import AdaptiveParams, _MOMENTUM_BUY_THRESHOLD
 from dia_core.strategy.policy.bandit import BanditPolicy
 
-_MOMENTUM_BUY_THRESHOLD: float = 0.5
+# Import utility functions to keep decision logic simple.
+from dia_core.strategy.utils import (
+    compute_k_atr,
+    compute_trade_probability,
+    should_execute_trade,
+    determine_side,
+    build_order_intent,
+)
 
-
-@dataclass(frozen=True)
-class AdaptiveParams:
-    """Paramètres simples de modulation.
-
-    Attributes :
-        base_prob : probabilité de base (régime neutre)
-        max_boost : amplification max de la prob par score
-        k_atr_min : k_atr en régime calme
-        k_atr_max : k_atr en régime explosif
-
-    Args:
-
-    Returns:
-
-    """
-
-    base_prob: float = 0.10
-    max_boost: float = 0.60
-    k_atr_min: float = 1.5
-    k_atr_max: float = 3.0
+__all__ = ["AdaptiveParams", "_MOMENTUM_BUY_THRESHOLD"]
 
 
 def _interp(a: float, b: float, t: float) -> float:
@@ -76,53 +63,49 @@ def decide_intent(
     rng_seed: int | None = 42,
     policy: BanditPolicy | None = None,
 ) -> tuple[OrderIntent | None, MarketSnapshot, RegimeVector]:
-    """Génère éventuellement un OrderIntent en fonction du régime.
+    """Generate an optional :class:`OrderIntent` based on market regime.
 
-    - La direction suit le signe du momentum (>=0.5 → buy, sinon sell).
-    - La probabilité de déclenchement = base_prob + score * max_boost.
-    - k_atr = interpolation entre [k_atr_min, k_atr_max] selon *score*.
-
-    Returns: (intent|None, market, regime)
+    The decision logic follows a simple probabilistic approach where the
+    likelihood of a trade increases with the regime score. The k_ATR
+    multiplicator, trade probability and side selection are all
+    delegated to small helper functions defined in
+    :mod:`dia_core.strategy.utils`. This keeps the cyclomatic
+    complexity of this function low and facilitates unit testing.
 
     Args:
-      *:
-      df: pd.DataFrame:
-      symbol: str:
-      params: AdaptiveParams | None:  (Default value = None)
-      rng_seed: int | None:  (Default value = 42)
-      policy: BanditPolicy | None:  (Default value = None)
+        df: Price window as a :class:`pandas.DataFrame`.
+        symbol: Trading pair identifier.
+        params: Optional set of strategy parameters. Defaults to
+            :class:`AdaptiveParams`.
+        rng_seed: Random seed used to initialise the RNG for
+            reproducibility.
+        policy: Optional multi-armed bandit policy for hyperparameter
+            selection.
 
     Returns:
-
+        A tuple ``(intent, market, regime)``. ``intent`` is ``None``
+        when no trade should be executed.
     """
-    params = params or AdaptiveParams()
-    regime = compute_regime(df)
-
-    # Si une policy est fournie, on tire un bras → hyperparamètres
+    strategy_params: AdaptiveParams = params or AdaptiveParams()
+    regime: RegimeVector = compute_regime(df)
+    # Override parameters from a bandit policy when provided.
     if policy is not None:
         _idx, cfg = policy.select(np.random.default_rng(rng_seed))
-        params = AdaptiveParams(**cfg)
-
-    price = float(df["close"].iloc[-1]) if not df.empty else 0.0
-
-    k_atr = _interp(params.k_atr_min, params.k_atr_max, regime.score)
-    market = MarketSnapshot(
-        price=price, atr=max(1e-6, np.std(np.diff(df["close"].to_numpy()))), k_atr=k_atr
+        strategy_params = AdaptiveParams(**cfg)
+    price: float = float(df["close"].iloc[-1]) if not df.empty else 0.0
+    # Compute k_ATR and market snapshot.
+    k_atr: float = compute_k_atr(strategy_params, regime.score)
+    market: MarketSnapshot = MarketSnapshot(
+        price=price,
+        atr=max(1e-6, np.std(np.diff(df["close"].to_numpy()))),
+        k_atr=k_atr,
     )
-
-    # Probabilité de trade
-    p = float(np.clip(params.base_prob + params.max_boost * regime.score, 0.0, 1.0))
-    rnd = np.random.default_rng(rng_seed)
-    if rnd.random() > p or price <= 0.0:
+    # Determine probability of trading.
+    prob: float = compute_trade_probability(strategy_params, regime.score)
+    rng = np.random.default_rng(rng_seed)
+    if not should_execute_trade(prob, price, rng):
         return None, market, regime
-
-    side = "buy" if regime.momentum >= _MOMENTUM_BUY_THRESHOLD else "sell"
-    intent = OrderIntent(
-        symbol=symbol,
-        side=side,
-        type="limit",
-        qty=0.0,
-        limit_price=price,
-        time_in_force="GTC",
-    )
+    # Decide trade side and build the intent.
+    side: str = determine_side(regime.momentum)
+    intent: OrderIntent = build_order_intent(symbol, side, price)
     return intent, market, regime

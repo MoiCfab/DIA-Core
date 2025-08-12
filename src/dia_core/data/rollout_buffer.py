@@ -1,7 +1,5 @@
-"""Module src/dia_core/data/rollout_buffer.py."""
-
-# Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
-# All Rights Reserved — Usage without permission is prohibited
+# src/dia_core/data/rollout_buffer.py
+"""Événements de rollout (décisions et résultats) sérialisés en JSONL."""
 
 from __future__ import annotations
 
@@ -10,11 +8,12 @@ import json
 from pathlib import Path
 import time
 from typing import Any
+from collections.abc import Mapping
 
 
 @dataclass(frozen=True)
 class RolloutEvent:
-    """Buffer d`événements pour journaliser décisions et résultats."""
+    """Événement élémentaire journalisé dans le buffer."""
 
     ts: int
     phase: str  # "decision" | "outcome"
@@ -23,82 +22,43 @@ class RolloutEvent:
     info: dict[str, Any]
 
 
+@dataclass(frozen=True)
+class DecisionInfo:
+    """Métadonnées d`une décision de stratégie."""
+
+    arm_idx: int
+    regime: Mapping[str, float]
+    params: Mapping[str, float]
+    side: str | None  # "buy" | "sell" | None
+
+
 class RolloutBuffer:
-    """Buffer JSONL très léger pour tracer (R, action, récompense)."""
+    """Buffer JSONL léger pour tracer (R, action, récompense)."""
 
     def __init__(self, path: str | Path = "Logs/rollouts.jsonl") -> None:
+        """Initialise le buffer et crée le dossier au besoin."""
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
     def append(self, event: RolloutEvent) -> None:
-        """
-
-        Args:
-          event: RolloutEvent:
-          event: RolloutEvent:
-
-        Returns:
-
-        """
+        """Ajoute un événement sérialisé en fin de fichier."""
         with self.path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(asdict(event), ensure_ascii=False) + "\n")
 
-    # Helpers pratiques
-    def log_decision(
-        self,
-        *,
-        symbol: str,
-        arm_idx: int,
-        regime: dict[str, float],
-        params: dict[str, float],
-        side: str | None,
-    ) -> None:  # pylint: disable=too-many-arguments
-        """Args:
-          *:
-          symbol: str:
-          arm_idx: int:
-          regime: dict[str:
-          float]:
-
-        Args:
-          side: str
-          *:
-          symbol: str:
-          arm_idx: int:
-          regime: dict[str:
-          float]:
-          params: dict[str:
-          side: str | None:
-
-        Returns:
-
-
-        """
+    def log_decision(self, *, symbol: str, meta: DecisionInfo) -> None:
+        """Journalise une décision de stratégie."""
         self.append(
             RolloutEvent(
                 ts=int(time.time()),
                 phase="decision",
                 symbol=symbol,
-                arm_idx=arm_idx,
-                info={"regime": regime, "params": params, "side": side},
+                arm_idx=meta.arm_idx,
+                info={"regime": dict(meta.regime), "params": dict(meta.params), "side": meta.side},
             )
         )
 
     def log_outcome(self, *, symbol: str, arm_idx: int, reward: float) -> None:
-        """
-
-        Args:
-          *:
-          symbol: str:
-          arm_idx: int:
-          reward: float:
-          symbol: str:
-          arm_idx: int:
-          reward: float:
-
-        Returns:
-
-        """
+        """Journalise le résultat associé à une décision antérieure."""
         self.append(
             RolloutEvent(
                 ts=int(time.time()),

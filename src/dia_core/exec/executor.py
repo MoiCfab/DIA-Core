@@ -25,6 +25,7 @@ from __future__ import annotations
 import logging
 from typing import Literal
 import uuid
+from dataclasses import dataclass
 
 from dia_core.config.models import RiskLimits as ConfigRiskLimits
 from dia_core.exec.pre_trade import pre_trade_checks
@@ -34,6 +35,15 @@ from dia_core.risk.errors import RiskLimitExceededError
 
 logger = logging.getLogger(__name__)
 Mode = Literal["dry_run", "paper", "live"]
+
+
+@dataclass(frozen=True)
+class ExecOptions:
+    """Gestion des paramètres"""
+    mode: Mode = "dry_run"
+    min_notional: float = 10.0
+    limits: ConfigRiskLimits | None = None
+    require_interactive_confirm: bool = True
 
 
 class Executor:  # pylint: disable=too-few-public-methods
@@ -58,29 +68,19 @@ class Executor:  # pylint: disable=too-few-public-methods
 
     """
 
-    def __init__(
-        self,
-        client: KrakenClient,
-        mode: Mode = "dry_run",
-        min_notional: float = 10.0,
-        limits: ConfigRiskLimits | None = None,
-        require_interactive_confirm: bool = True,
-    ):
+    def __init__(self, client: KrakenClient, *, options: ExecOptions | None = None) -> None:
         """Crée un exécuteur.
 
-        Args :
-            client : Client Kraken initialisé.
-            mode : Mode d`exécution ("dry_run", "paper", "live").
-            min_notional : Notionnel minimum toléré localement.
-            limits : Limites de risque ; par défaut, une instance neutre.
-            require_interactive_confirm : Si vrai, confirmation manuelle requise en "live".
+        Args:
+            client: Client Kraken initialisé.
+            options: Options d'exécution (mode, notionnel min, limites risque, confirmation live).
         """
+        opts = options or ExecOptions()
         self.client = client
-        self.mode = mode
-        self.min_notional = min_notional
-        # Utilise le modèle de config (attendu par pre_trade_checks / validate_order)
-        self.limits: ConfigRiskLimits = limits or ConfigRiskLimits()
-        self.require_interactive_confirm = require_interactive_confirm
+        self.mode = opts.mode
+        self.min_notional = opts.min_notional
+        self.limits: ConfigRiskLimits = opts.limits or ConfigRiskLimits()
+        self.require_interactive_confirm = opts.require_interactive_confirm
 
     def _confirm_live(self) -> None:
         """Demande une confirmation interactive en mode "live".
