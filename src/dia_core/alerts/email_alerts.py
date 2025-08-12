@@ -29,6 +29,8 @@ import ssl
 
 @dataclass
 class EmailConfig:
+    """ """
+
     smtp_host: str
     smtp_port: int = 587
     username: str | None = None
@@ -48,12 +50,26 @@ class EmailAlerter:
             subject="[DIA-Core] Surcharge CPU",
             body="CPU 95% sur 2 min, 3 paires désactivées",
         )
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, cfg: EmailConfig) -> None:
         self.cfg = cfg
 
     def _build(self, subject: str, body: str) -> EmailMessage:
+        """
+
+        Args:
+          subject: str:
+          body: str:
+
+        Returns:
+
+        """
         msg = EmailMessage()
         msg["Subject"] = subject
         msg["From"] = self.cfg.sender
@@ -62,6 +78,15 @@ class EmailAlerter:
         return msg
 
     def send(self, subject: str, body: str) -> None:
+        """
+
+        Args:
+          subject: str:
+          body: str:
+
+        Returns:
+
+        """
         if not self.cfg.recipients:
             return
         msg = self._build(subject, body)
@@ -90,7 +115,15 @@ class EmailAlerter:
                 s.send_message(msg)
 
     def try_send(self, subject: str, body: str) -> bool:
-        """Envoie et retourne True si succès, False si échec (loggue l'erreur)."""
+        """Envoie et retourne True si succès, False si échec (loggue l'erreur).
+
+        Args:
+          subject: str:
+          body: str:
+
+        Returns:
+
+        """
         try:
             self.send(subject, body)
             return True
@@ -99,6 +132,7 @@ class EmailAlerter:
             return False
 
     def send_test(self) -> bool:
+        """ """
         return self.try_send(
             "[DIA-Core] Test d'alerte email",
             "Ceci est un email de test envoyé par DIA-Core pour vérifier la configuration SMTP.",

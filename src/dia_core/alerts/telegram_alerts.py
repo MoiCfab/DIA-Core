@@ -32,12 +32,15 @@ _HTTP_OK_MAX_EXCL: Final[int] = 300
 
 @dataclass(frozen=True)
 class TgConfig:
+    """ """
+
     token: str
     chat_id: str
     dry_run: bool = True
 
 
 def load_config_from_env() -> TgConfig | None:
+    """ """
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat = os.environ.get("TELEGRAM_CHAT_ID")
     dry = os.environ.get("DIA_TELEGRAM_DRY_RUN", "1") != "0"
@@ -47,6 +50,15 @@ def load_config_from_env() -> TgConfig | None:
 
 
 def build_payload(cfg: TgConfig, text: str) -> tuple[str, bytes]:
+    """
+
+    Args:
+      cfg: TgConfig:
+      text: str:
+
+    Returns:
+
+    """
     url = _API_URL_TMPL.format(token=cfg.token)
     body = {"chat_id": cfg.chat_id, "text": text}
     return url, json.dumps(body).encode("utf-8")
@@ -56,9 +68,18 @@ def send(cfg: TgConfig, text: str, *, transport: Callable[[str, bytes], int] | N
     """Envoie un message. En dry_run, ne fait qu'assembler le payload.
 
     Args:
-        cfg: configuration Telegram
-        text: contenu
-        transport: callable optionnel (url: str, body: bytes) -> int (status)
+      cfg: configuration Telegram
+      text: contenu
+      transport: callable optionnel (url: str, body: bytes) -> int (status)
+      cfg: TgConfig:
+      text: str:
+      *:
+      transport: Callable[[str:
+      bytes]:
+      int] | None:  (Default value = None)
+
+    Returns:
+
     """
     url, body = build_payload(cfg, text)
     if cfg.dry_run:

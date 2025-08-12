@@ -1,3 +1,5 @@
+"""Module src/dia_core/alerts/formatters.py."""
+
 # Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
 # All Rights Reserved — Usage without permission is prohibited
 
@@ -9,6 +11,8 @@ from datetime import UTC, datetime
 
 @dataclass(frozen=True)
 class SymbolSummary:
+    """ """
+
     symbol: str
     side: str | None
     k_atr: float | None
@@ -22,6 +26,16 @@ class SymbolSummary:
 
 
 def _fmt_pct(x: float | None, *, plus: bool = True) -> str:
+    """
+
+    Args:
+      x: float | None:
+      *:
+      plus: bool:  (Default value = True)
+
+    Returns:
+
+    """
     if x is None:
         return "n/a"
     s = f"{x:+.1f}%" if plus else f"{x:.1f}%"
@@ -29,6 +43,15 @@ def _fmt_pct(x: float | None, *, plus: bool = True) -> str:
 
 
 def render_subject(mode: str, items: list[SymbolSummary]) -> str:
+    """
+
+    Args:
+      mode: str:
+      items: list[SymbolSummary]:
+
+    Returns:
+
+    """
     ts = datetime.now(UTC).strftime("%Y-%m-%d %H:%MZ")
     # Sujet compact: prend le 1er symbole
     head = items[0] if items else None
@@ -40,6 +63,15 @@ def render_subject(mode: str, items: list[SymbolSummary]) -> str:
 
 
 def render_text(mode: str, items: list[SymbolSummary]) -> str:
+    """
+
+    Args:
+      mode: str:
+      items: list[SymbolSummary]:
+
+    Returns:
+
+    """
     ts = datetime.now(UTC).strftime("%Y-%m-%d %H:%MZ")
     lines = [
         f"DIA-Core — {mode} — {ts}",
@@ -68,6 +100,15 @@ def render_text(mode: str, items: list[SymbolSummary]) -> str:
 
 
 def render_markdown(mode: str, items: list[SymbolSummary]) -> str:
+    """
+
+    Args:
+      mode: str:
+      items: list[SymbolSummary]:
+
+    Returns:
+
+    """
     # Telegram (MarkdownV2 safe-enough: pas d`emoji ni caractères spéciaux ici)
     ts = datetime.now(UTC).strftime("%Y-%m-%d %H:%MZ")
     out = [f"*DIA-Core* — *{mode}* — `{ts}`", ""]

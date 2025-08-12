@@ -21,6 +21,8 @@ _MIN_EQUITY_LEN = 2
 
 @dataclass(frozen=True)
 class PerfStats:
+    """ """
+
     total_return: float
     max_drawdown: float
     sharpe: float
@@ -28,10 +30,26 @@ class PerfStats:
 
 
 def _downs(x: NDArray[np.float64]) -> NDArray[np.float64]:
+    """
+
+    Args:
+      x: NDArray[np.float64]:
+
+    Returns:
+
+    """
     return np.clip(x, None, 0.0).astype(np.float64)
 
 
 def perf_from_equity(equity: NDArray[np.float64]) -> PerfStats:
+    """
+
+    Args:
+      equity: NDArray[np.float64]:
+
+    Returns:
+
+    """
     if equity.size < _MIN_EQUITY_LEN:
         return PerfStats(0.0, 0.0, 0.0, 0.0)
     rets: NDArray[np.float64] = (np.diff(equity) / (equity[:-1] + 1e-12)).astype(np.float64)

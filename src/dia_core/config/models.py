@@ -36,6 +36,11 @@ class ExchangeMeta(BaseModel):
         qty_decimals : Nombre de décimales pour la quantité.
         min_qty : Quantité minimale autorisée.
         min_notional : Notionnel minimal (prix * quantité) autorisé.
+
+    Args:
+
+    Returns:
+
     """
 
     symbol: str = Field(..., description="Paire ex: 'BTC/EUR'")
@@ -46,15 +51,7 @@ class ExchangeMeta(BaseModel):
 
 
 class RiskLimits(BaseModel):
-    """Paramètres de gestion du risque.
-
-    Attributes:
-        max_daily_loss_pct : Perte quotidienne maximale (en % de l'équité).
-        max_drawdown_pct : Drawdown maximal autorisé (en % de l'équité).
-        max_exposure_pct : Exposition maximale autorisée (en % de l'équité).
-        risk_per_trade_pct : Risque par trade (en % de l'équité).
-        max_orders_per_min : Nombre maximum d'ordres par minute.
-    """
+    """Paramètres de gestion du risque."""
 
     max_daily_loss_pct: float = 2.0
     max_drawdown_pct: float = 15.0
@@ -76,6 +73,11 @@ class AppConfig(BaseModel):
         log_dir : Répertoire des logs.
         pair : Paire de trading principale.
         require_interactive_confirm : Demande une confirmation manuelle avant exécution réelle.
+
+    Args:
+
+    Returns:
+
     """
 
     mode: Mode = "dry_run"
@@ -102,6 +104,12 @@ class AppConfig(BaseModel):
         Notes :
             Cette validation n'empêche pas l'exécution en mode "live", mais
             signale à l'utilisateur que le bot sera en conditions réelles.
+
+        Args:
+          v: Mode:
+
+        Returns:
+
         """
         if v == "live":
             print("[SECURITY] Attention: mode LIVE activé")

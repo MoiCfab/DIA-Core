@@ -1,3 +1,5 @@
+"""Module src/dia_core/cli/run_impl.py."""
+
 # Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
 # All Rights Reserved — Usage without permission is prohibited
 
@@ -10,7 +12,14 @@ from pandas import DataFrame
 
 
 def get_last_window(symbol: str) -> DataFrame | None:  # pragma: no cover
-    """Retourne une fenêtre OHLC si le provider est dispo, sinon None (safe)."""
+    """Retourne une fenêtre OHLC si le provider est dispo, sinon None (safe).
+
+    Args:
+      symbol: str:
+
+    Returns:
+
+    """
     with suppress(Exception):
         from dia_core.data import provider as _prov  # runtime only
 
@@ -27,7 +36,17 @@ def run_once(
     symbol: str,
     k_atr_override: float | None = None,
 ) -> tuple[bool, str | None]:
-    """Exécute un cycle de décision (stub sûr pour V3). Retourne (ok, side)."""
+    """Exécute un cycle de décision (stub sûr pour V3). Retourne (ok, side).
+
+    Args:
+      *:
+      mode: str:
+      symbol: str:
+      k_atr_override: float | None:  (Default value = None)
+
+    Returns:
+
+    """
     side: str | None = None
     px = 0.0
     with suppress(Exception):

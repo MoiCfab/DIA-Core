@@ -1,3 +1,5 @@
+"""Module src/dia_core/cli/main.py."""
+
 # Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
 # All Rights Reserved — Usage without permission is prohibited
 
@@ -21,6 +23,7 @@ _MIN_REG_WINDOW = 5
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """ """
     parser = argparse.ArgumentParser("dia-core")
     parser.add_argument("--config", default="", help="Chemin du fichier de configuration JSON")
     sub = parser.add_subparsers(dest="cmd", required=False)
@@ -56,6 +59,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _maybe_notify_telegram(msg: str) -> None:
+    """
+
+    Args:
+      msg: str:
+
+    Returns:
+
+    """
     cfg = load_config_from_env()
     if not cfg:
         return
@@ -71,6 +82,20 @@ def _maybe_write_monitor(
     last_side: str | None,
     path: str,
 ) -> None:
+    """
+
+    Args:
+      symbol: str:
+      *:
+      regime: dict[str:
+      float]:
+      k_atr: float:
+      last_side: str | None:
+      path: str:
+
+    Returns:
+
+    """
     if not path:
         return
     with suppress(Exception):
@@ -88,6 +113,14 @@ def _maybe_write_monitor(
 
 
 def _handle_run(args: argparse.Namespace) -> int:
+    """
+
+    Args:
+      args: argparse.Namespace:
+
+    Returns:
+
+    """
     from dia_core.cli.run_impl import get_last_window, run_once
 
     dyn = bool(args.dynamic_risk)
@@ -132,11 +165,27 @@ def _handle_run(args: argparse.Namespace) -> int:
 
 
 def _handle_orchestrate(args: argparse.Namespace) -> int:
+    """
+
+    Args:
+      args: argparse.Namespace:
+
+    Returns:
+
+    """
     from dia_core.cli.run_impl import get_last_window, run_once
 
     syms: Sequence[str] = [s.strip() for s in str(args.symbols).split(",") if s.strip()]
 
     def _worker(sym: str) -> None:
+        """
+
+        Args:
+          sym: str:
+
+        Returns:
+
+        """
         k_atr_override: float | None = None
         if args.dynamic_risk:
             with suppress(Exception):
@@ -188,6 +237,14 @@ def _handle_orchestrate(args: argparse.Namespace) -> int:
 
 
 def _load_cfg(path: str) -> dict[str, Any] | None:
+    """
+
+    Args:
+      path: str:
+
+    Returns:
+
+    """
     if not path:
         return None
     try:
@@ -199,6 +256,14 @@ def _load_cfg(path: str) -> dict[str, Any] | None:
 
 
 def _handle_default_from_config(args: argparse.Namespace) -> int:
+    """
+
+    Args:
+      args: argparse.Namespace:
+
+    Returns:
+
+    """
     from dia_core.cli.run_impl import run_once
 
     cfg = _load_cfg(str(args.config))
@@ -209,6 +274,14 @@ def _handle_default_from_config(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """
+
+    Args:
+      argv: list[str] | None:  (Default value = None)
+
+    Returns:
+
+    """
     parser = build_parser()
     args = parser.parse_args(argv)
     if not args.cmd:

@@ -1,3 +1,5 @@
+"""Module src/dia_core/data/provider.py."""
+
 # Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
 # All Rights Reserved — Usage without permission is prohibited
 from __future__ import annotations
@@ -18,12 +20,29 @@ _QUOTES = {"EUR": "ZEUR", "USD": "ZUSD", "USDT": "USDT"}
 
 
 def _kraken_pair(symbol: str) -> str:
+    """
+
+    Args:
+      symbol: str:
+
+    Returns:
+
+    """
     base, quote = symbol.split("/")
     return f"{_BASES.get(base, base)}{_QUOTES.get(quote, quote)}"
 
 
 def get_last_price(symbol: str, *, timeout_s: float = 7.0) -> float:
-    """Prix spot récent via Kraken public / Ticker, fallback synthétique si réseau HS."""
+    """Prix spot récent via Kraken public / Ticker, fallback synthétique si réseau HS.
+
+    Args:
+      symbol: str:
+      *:
+      timeout_s: float:  (Default value = 7.0)
+
+    Returns:
+
+    """
     pair = _kraken_pair(symbol)
     url = "https://api.kraken.com/0/public/Ticker"
     try:
@@ -39,7 +58,17 @@ def get_last_price(symbol: str, *, timeout_s: float = 7.0) -> float:
 
 
 def load_ohlc_window(symbol: str, window: int = 200, *, interval_min: int = 1) -> pd.DataFrame:
-    """Fenêtre OHLC via Kraken public / OHLC, fallback synthétique si réseau HS."""
+    """Fenêtre OHLC via Kraken public / OHLC, fallback synthétique si réseau HS.
+
+    Args:
+      symbol: str:
+      window: int:  (Default value = 200)
+      *:
+      interval_min: int:  (Default value = 1)
+
+    Returns:
+
+    """
     pair = _kraken_pair(symbol)
     url = "https://api.kraken.com/0/public/OHLC"
     try:
@@ -73,6 +102,18 @@ def load_ohlc_window(symbol: str, window: int = 200, *, interval_min: int = 1) -
 
 
 def ohlc_dataframe(pair: str, payload: Mapping[str, Any], *, interval_min: int = 1) -> DataFrame:
+    """
+
+    Args:
+      pair: str:
+      payload: Mapping[str:
+      Any]:
+      *:
+      interval_min: int:  (Default value = 1)
+
+    Returns:
+
+    """
     if "result" in payload and isinstance(payload["result"], Mapping) and pair in payload["result"]:
         rows = payload["result"][pair]
     elif pair in payload:

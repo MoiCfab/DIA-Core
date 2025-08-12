@@ -51,6 +51,11 @@ class Executor:
         min_notional : Notionnel minimal accepté (sécurité locale).
         limits : Limites de risque actives (issues de la config).
         require_interactive_confirm : Demande de confirmation en mode "live".
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(
@@ -82,6 +87,11 @@ class Executor:
 
         Raises :
             SystemExit : Si l`utilisateur n`entre pas exactement "YES".
+
+        Args:
+
+        Returns:
+
         """
         if self.mode == "live" and self.require_interactive_confirm:
             answer = input("LIVE MODE: tapez 'YES' pour confirmer : ").strip()
@@ -108,6 +118,13 @@ class Executor:
         Notes:
             - En "live", on utilise "validate=true" ("dry-run" côté Kraken) pour
               sécuriser le payload avant envoi réel (étape distincte possible).
+
+        Args:
+          intent: OrderIntent:
+          equity: float:
+
+        Returns:
+
         """
         # Validation risque (hard-stop)
         try:

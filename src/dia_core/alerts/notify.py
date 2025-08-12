@@ -1,3 +1,5 @@
+"""Module src/dia_core/alerts/notify.py."""
+
 # Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
 # All Rights Reserved — Usage without permission is prohibited
 
@@ -20,6 +22,7 @@ from dia_core.alerts.telegram_alerts import (
 
 
 def _email_cfg_from_env() -> EmailConfig | None:
+    """ """
     host = os.getenv("SMTP_HOST")
     if not host:
         return None
@@ -38,6 +41,15 @@ def _email_cfg_from_env() -> EmailConfig | None:
 
 
 def notify_summary(mode: str, items: list[SymbolSummary]) -> None:
+    """
+
+    Args:
+      mode: str:
+      items: list[SymbolSummary]:
+
+    Returns:
+
+    """
     if not items:
         return
     # Telegram

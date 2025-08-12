@@ -1,3 +1,5 @@
+"""Module src/dia_core/data/rollout_buffer.py."""
+
 # Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
 # All Rights Reserved — Usage without permission is prohibited
 
@@ -12,6 +14,8 @@ from typing import Any
 
 @dataclass(frozen=True)
 class RolloutEvent:
+    """ """
+
     ts: int
     phase: str  # "decision" | "outcome"
     symbol: str
@@ -27,6 +31,14 @@ class RolloutBuffer:
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
     def append(self, event: RolloutEvent) -> None:
+        """
+
+        Args:
+          event: RolloutEvent:
+
+        Returns:
+
+        """
         with self.path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(asdict(event), ensure_ascii=False) + "\n")
 
@@ -40,6 +52,20 @@ class RolloutBuffer:
         params: dict[str, float],
         side: str | None,
     ) -> None:
+        """
+
+        Args:
+          *:
+          symbol: str:
+          arm_idx: int:
+          regime: dict[str:
+          float]:
+          params: dict[str:
+          side: str | None:
+
+        Returns:
+
+        """
         self.append(
             RolloutEvent(
                 ts=int(time.time()),
@@ -51,6 +77,17 @@ class RolloutBuffer:
         )
 
     def log_outcome(self, *, symbol: str, arm_idx: int, reward: float) -> None:
+        """
+
+        Args:
+          *:
+          symbol: str:
+          arm_idx: int:
+          reward: float:
+
+        Returns:
+
+        """
         self.append(
             RolloutEvent(
                 ts=int(time.time()),

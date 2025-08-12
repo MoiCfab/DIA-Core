@@ -1,3 +1,5 @@
+"""Module src/dia_core/strategy/policy/bandit.py."""
+
 # Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
 # All Rights Reserved — Usage without permission is prohibited
 

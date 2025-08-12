@@ -47,6 +47,12 @@ def load_config(path: str) -> AppConfig:
             cfg = load_config("config.json")
             cfg.mode
         'dry_run'
+
+    Args:
+      path: str:
+
+    Returns:
+
     """
     try:
         with open(path, encoding="utf-8") as f:

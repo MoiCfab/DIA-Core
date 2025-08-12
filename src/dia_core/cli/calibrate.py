@@ -1,3 +1,5 @@
+"""Module src/dia_core/cli/calibrate.py."""
+
 # Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
 # All Rights Reserved — Usage without permission is prohibited
 
@@ -13,6 +15,14 @@ from dia_core.strategy.policy.bandit import BanditPolicy
 
 
 def main(argv: list[str] | None = None) -> int:
+    """
+
+    Args:
+      argv: list[str] | None:  (Default value = None)
+
+    Returns:
+
+    """
     parser = argparse.ArgumentParser("dia-core-calibrate")
     parser.add_argument("--policy", default="Logs/policy.json")
     parser.add_argument("--rollouts", default="Logs/rollouts.jsonl")

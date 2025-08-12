@@ -1,3 +1,5 @@
+"""Module src/dia_core/risk/dynamic_fake.py."""
+
 from __future__ import annotations
 
 from dia_core.exec.pre_trade import (  # <- utilise la même dataclass que propose_order

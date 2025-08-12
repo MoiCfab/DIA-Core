@@ -28,16 +28,7 @@ OrderType = Literal["market", "limit"]
 
 
 class OrderIntent(BaseModel):
-    """Representation d'une intention d'ordre avant envoi a l'exchange.
-
-    Attributes:
-        symbol: Symbole de la paire (ex: "BTC/EUR").
-        side: Cote de l'ordre ("buy" ou "sell").
-        type: Type d'ordre ("market" ou "limit").
-        qty: Quantite a echanger.
-        limit_price: Prix limite (necessaire si type == "limit").
-        time_in_force: Politique de validite ("GTC" = Good Till Cancel, "IOC" = Immediate Or Cancel)
-    """
+    """Representation d'une intention d'ordre avant envoi a l'exchange."""
 
     symbol: str
     side: Side
@@ -48,14 +39,7 @@ class OrderIntent(BaseModel):
 
 
 class SubmittedOrder(BaseModel):
-    """Representation d'un ordre apres soumission a l'exchange.
-
-    Attributes:
-        client_order_id: Identifiant genere localement pour tracer l'ordre.
-        exchange_order_id: Identifiant attribue par l'exchange (peut etre None en dry_run).
-        status: Statut de l'ordre ("accepted", "rejected", "filled", "partially_filled", "pending").
-        reason: Raison du rejet ou information supplementaire si applicable.
-    """
+    """Representation d'un ordre apres soumission a l'exchange."""
 
     client_order_id: str
     exchange_order_id: str | None = None

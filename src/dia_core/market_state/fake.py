@@ -1,3 +1,5 @@
+"""Module src/dia_core/market_state/fake.py."""
+
 from __future__ import annotations
 
 

@@ -39,6 +39,14 @@ def cache_path(cache_dir: str, pair: str, interval: int) -> Path:
 
     Notes :
         Les caractères "/" sont remplacés par "_" pour produire un nom de fichier sûr.
+
+    Args:
+      cache_dir: str:
+      pair: str:
+      interval: int:
+
+    Returns:
+
     """
     p = Path(cache_dir)
     p.mkdir(parents=True, exist_ok=True)
@@ -68,6 +76,14 @@ def load_cache(cache_dir: str, pair: str, interval: int) -> pd.DataFrame | None:
         df = load_cache("state/cache", "BTC/EUR", 1)
         df is None or isinstance(df, pd.DataFrame)
         True
+
+    Args:
+      cache_dir: str:
+      pair: str:
+      interval: int:
+
+    Returns:
+
     """
     path = cache_path(cache_dir, pair, interval)
     if not path.exists():
@@ -93,6 +109,15 @@ def save_cache(cache_dir: str, pair: str, interval: int, df: pd.DataFrame) -> No
 
     Journalisation :
         INFO si l`écriture est ignorée (absence de moteur Parquet, erreur de format).
+
+    Args:
+      cache_dir: str:
+      pair: str:
+      interval: int:
+      df: pd.DataFrame:
+
+    Returns:
+
     """
     path = cache_path(cache_dir, pair, interval)
     try:

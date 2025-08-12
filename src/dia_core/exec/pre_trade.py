@@ -37,6 +37,11 @@ class MarketSnapshot:
         price : Dernier prix observe.
         atr : Average True Range en unite de prix.
         k_atr : Multiplicateur d'ATR pour calibrer le stop cible.
+
+    Args:
+
+    Returns:
+
     """
 
     price: float
@@ -52,6 +57,11 @@ class RiskContext:
         equity : Equite totale disponible (devise du compte).
         current_exposure_pct : Exposition actuelle totale en pourcentage d'equite.
         orders_last_min : Nombre d'ordres émis sur la dernière minute.
+
+    Args:
+
+    Returns:
+
     """
 
     equity: float
@@ -81,8 +91,17 @@ def pre_trade_checks(
         min_notional : Notionnel minimal local. Parametre reserve pour des
             controles complementaires.
 
+    Args:
+      intent: OrderIntent:
+      limits: ConfigRiskLimits:
+      _equity: float:
+      _min_notional: float:
+
+    Returns:
+
     Raises:
-        RiskLimitExceededError: Si une contrainte de `limits` est depassee.
+      RiskLimitExceededError: Si une contrainte de `limits` est depassee.
+
     """
     current_exposure_pct: float = getattr(intent, "current_exposure_pct", 0.0)
     projected_exposure_pct: float = getattr(intent, "projected_exposure_pct", 0.0)
@@ -120,6 +139,15 @@ def propose_order(*, cfg: AppConfig, market: MarketSnapshot, risk: RiskContext) 
     Raises :
         RiskLimitExceededError : Si l'ordre projetterait une exposition au-dela
             des limites de `cfg.risk`.
+
+    Args:
+      *:
+      cfg: AppConfig:
+      market: MarketSnapshot:
+      risk: RiskContext:
+
+    Returns:
+
     """
     params = SizingParams(
         equity=risk.equity,
