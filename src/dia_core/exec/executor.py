@@ -40,6 +40,7 @@ Mode = Literal["dry_run", "paper", "live"]
 @dataclass(frozen=True)
 class ExecOptions:
     """Gestion des paramètres"""
+
     mode: Mode = "dry_run"
     min_notional: float = 10.0
     limits: ConfigRiskLimits | None = None
