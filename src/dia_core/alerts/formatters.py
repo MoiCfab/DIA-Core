@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 
 @dataclass(frozen=True)
-class SymbolSummary:
+class SymbolSummary:  # pylint: disable=too-many-instance-attributes
     """Conteneur des champs affichés dans les messages."""
 
     symbol: str

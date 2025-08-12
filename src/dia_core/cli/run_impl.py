@@ -9,6 +9,7 @@ from contextlib import suppress
 from typing import Any
 
 from pandas import DataFrame
+from dia_core.data import provider as _prov  # runtime only
 
 
 def get_last_window(symbol: str) -> DataFrame | None:  # pragma: no cover
@@ -22,7 +23,6 @@ def get_last_window(symbol: str) -> DataFrame | None:  # pragma: no cover
 
     """
     with suppress(Exception):
-        from dia_core.data import provider as _prov  # runtime only
 
         provider: Any = _prov
         win = provider.load_ohlc_window(symbol, 200)  # signature inconnue -> Any
@@ -52,9 +52,10 @@ def run_once(
 
     """
     side: str | None = None
+    _mode = mode
+    _k_atr_override = k_atr_override
     px = 0.0
     with suppress(Exception):
-        from dia_core.data import provider as _prov  # runtime only
 
         provider: Any = _prov
         px = float(provider.get_last_price(symbol))  # signature inconnue -> Any

@@ -12,7 +12,10 @@ import json
 import os
 from typing import Any, cast
 
+from dia_core.alerts.formatters import SymbolSummary
+from dia_core.alerts.notify import notify_summary
 from dia_core.alerts.telegram_alerts import load_config_from_env, send as tg_send
+from dia_core.cli.run_impl import get_last_window, run_once
 from dia_core.logging.setup import setup_logging
 from dia_core.market_state.regime_vector import compute_regime
 from dia_core.monitor.ui_app import build_state
@@ -128,7 +131,6 @@ def _handle_run(args: argparse.Namespace) -> int:
     Returns:
 
     """
-    from dia_core.cli.run_impl import get_last_window, run_once
 
     dyn = bool(args.dynamic_risk)
     mon_path = str(args.monitor_file or "")
@@ -181,7 +183,6 @@ def _handle_orchestrate(args: argparse.Namespace) -> int:
     Returns:
 
     """
-    from dia_core.cli.run_impl import get_last_window, run_once
 
     syms: Sequence[str] = [s.strip() for s in str(args.symbols).split(",") if s.strip()]
 
@@ -203,6 +204,7 @@ def _handle_orchestrate(args: argparse.Namespace) -> int:
                     reg = compute_regime(window)
                     k_atr_override = float(adjust_dynamic_risk(reg).k_atr)
         ok, side = run_once(mode=args.mode, symbol=sym, k_atr_override=k_atr_override)
+        _ = ok
         if args.telegram:
             msg = (
                 f"DIA-Core {args.mode} {sym} — side={side} "
@@ -221,9 +223,6 @@ def _handle_orchestrate(args: argparse.Namespace) -> int:
     run_batch(syms, worker=_worker, cfg=cfg)
     # Récap global (pour notifs)
     with suppress(Exception):  # pragma: no cover
-
-        from dia_core.alerts.formatters import SymbolSummary
-        from dia_core.alerts.notify import notify_summary
 
         summaries: list[SymbolSummary] = []
         sym = args.symbol
@@ -275,7 +274,6 @@ def _handle_default_from_config(args: argparse.Namespace) -> int:
     Returns:
 
     """
-    from dia_core.cli.run_impl import run_once
 
     cfg = _load_cfg(str(args.config))
     mode = (cfg or {}).get("mode", "dry_run")

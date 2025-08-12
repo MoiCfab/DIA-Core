@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 Mode = Literal["dry_run", "paper", "live"]
 
 
-class Executor:
+class Executor:  # pylint: disable=too-few-public-methods
     """Gestionnaire d`exécution des ordres.
 
     Rôle :

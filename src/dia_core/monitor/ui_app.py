@@ -61,7 +61,7 @@ def run(state: UiState) -> None:  # pragma: no cover - interface
 
     """
     try:
-        import streamlit as st  # type: ignore
+        import streamlit as st  # type: ignore[import-not-found]
     except Exception as e:  # streamlit absent
         raise RuntimeError("Streamlit not installed") from e
 

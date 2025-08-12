@@ -52,7 +52,7 @@ class RolloutBuffer:
         regime: dict[str, float],
         params: dict[str, float],
         side: str | None,
-    ) -> None:
+    ) -> None:  # pylint: disable=too-many-arguments
         """Args:
           *:
           symbol: str:

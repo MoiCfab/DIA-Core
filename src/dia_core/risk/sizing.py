@@ -23,7 +23,7 @@ from typing import Final
 
 
 @dataclass(frozen=True)
-class SizingParams:
+class SizingParams:  # pylint: disable=too-many-instance-attributes
     """Paramètres necessaires pour calculer la taille d'une position.
 
     Attributes :

@@ -27,7 +27,7 @@ from dia_core.monitor.health_monitor import HealthMonitor, Thresholds
 logger = logging.getLogger(__name__)
 
 
-class OverloadGuard:
+class OverloadGuard:  # pylint: disable=too-few-public-methods
     """Surveillance et reduction de charge sans downgrade du modele IA.
 
     Comportement :

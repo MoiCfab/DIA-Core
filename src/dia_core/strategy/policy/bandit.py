@@ -45,7 +45,7 @@ class BanditPolicy:
     reward_scale: float = 0.01  # ~1% de PnL -> reward ~ 0.73
     storage_path: Path = Path("Logs/policy.json")
 
-    _MIN_AB: Final[float] = 1e-3
+    MIN_AB: Final[float] = 1e-3
 
     @staticmethod
     def default(storage: str | None = None) -> BanditPolicy:
@@ -88,7 +88,7 @@ class BanditPolicy:
             idx = int(rng.integers(0, len(self.arms)))
         else:
             # Beta(alpha, beta) ~ proba de 'succès' attendue
-            samples = rng.beta(self.alpha.clip(self._MIN_AB), self.beta.clip(self._MIN_AB))
+            samples = rng.beta(self.alpha.clip(self.MIN_AB), self.beta.clip(self.MIN_AB))
             idx = int(np.argmax(samples))
         arm = self.arms[idx]
         return idx, {
@@ -117,7 +117,7 @@ class BanditPolicy:
     # ---------- Persistance ----------
 
     def save(self) -> None:
-        """ """
+        """Enregistre"""
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
         data: dict[str, Any] = {
             "arms": [arm.__dict__ for arm in self.arms],
@@ -131,7 +131,7 @@ class BanditPolicy:
 
     @classmethod
     def load(cls, path: str | Path) -> BanditPolicy:
-        """
+        """Charge ou initialise la politique depuis le disque.
 
         Args:
           path: str | Path:

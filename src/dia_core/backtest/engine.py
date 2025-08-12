@@ -58,7 +58,6 @@ def run(
       cfg: BTConfig | None:  (Default value = None)
       decide: Callable[...:
       tuple[OrderIntent | None:
-      MarketSnapshot:
       RegimeVector]]:  (Default value = decide_intent)
 
     Args:
@@ -67,7 +66,6 @@ def run(
       cfg: BTConfig | None:  (Default value = None)
       decide: Callable[...:
       tuple[OrderIntent | None:
-      MarketSnapshot:
       RegimeVector]]:  (Default value = decide_intent)
       params: AdaptiveParams | None:  (Default value = None)
 
@@ -87,11 +85,11 @@ def run(
     positions: list[float] = [pos]
     equities: list[float] = [equity]
 
-    # Boucle : exécution au close
+    # Boucle : exécution au "close"
     for i in range(1, len(df)):
         window = df.iloc[: i + 1]
         price = float(window["close"].iloc[-1])
-        intent, market, _ = decide(df=window, symbol=cfg.symbol, params=params, rng_seed=i)
+        intent, _market, _ = decide(df=window, symbol=cfg.symbol, params=params, rng_seed=i)
 
         # Ferme la position précédente si un signal opposé arrive
         if pos != 0.0 and intent is not None:

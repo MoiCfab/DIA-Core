@@ -40,7 +40,7 @@ class SchedulerOverloadError(RuntimeError):
 
 @dataclass(frozen=True)
 class SystemQuotas:
-    """ """
+    """Seuils CPU/RAM/IO pour l`ordonnancement."""
 
     max_cpu_pct: float = 85.0
     max_ram_pct: float = 85.0
@@ -49,7 +49,7 @@ class SystemQuotas:
 
 @dataclass(frozen=True)
 class RetryPolicy:
-    """ """
+    """Politique de retry exponentiel."""
 
     max_retries: int = 2
     base_backoff_s: float = 0.5  # backoff exponentiel
@@ -57,7 +57,7 @@ class RetryPolicy:
 
 @dataclass(frozen=True)
 class JobResult:
-    """ """
+    """Résultat d`un job (succès, tentatives, durée)."""
 
     symbol: str
     ok: bool
@@ -68,7 +68,7 @@ class JobResult:
 
 @dataclass(frozen=True)
 class SchedulerConfig:
-    """ """
+    """Paramètres de scheduling et backoff."""
 
     max_workers: int = 2
     quotas: SystemQuotas = field(default_factory=SystemQuotas)
@@ -134,7 +134,7 @@ def _run_one(
             return JobResult(symbol, True, attempts, monotonic() - start, None)
         except SchedulerOverloadError:
             raise
-        except Exception as e:  # noqa: BLE001  # pragma: no cover - chemins d'exception
+        except (OSError, TimeoutError, ValueError) as e:
             err = f"{type(e).__name__}: {e}"
             if k < retry.max_retries:
                 _backoff_sleep(retry.base_backoff_s, k)

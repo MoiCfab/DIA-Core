@@ -75,6 +75,7 @@ def load_ohlc_window(symbol: str, window: int = 200, *, interval_min: int = 1) -
     Returns:
 
     """
+    _ = interval_min
     pair = _kraken_pair(symbol)
     url = "https://api.kraken.com/0/public/OHLC"
     try:

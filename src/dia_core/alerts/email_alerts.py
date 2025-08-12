@@ -28,7 +28,7 @@ import ssl
 
 
 @dataclass
-class EmailConfig:
+class EmailConfig:  # pylint: disable=too-many-instance-attributes
     """Paramètres Email (smtp, password, recipients)."""
 
     smtp_host: str

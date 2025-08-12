@@ -33,7 +33,7 @@ from typing import Any
 _CONFIGURED_LOGGERS: set[str] = set()
 
 
-class _TradeIdFilter(logging.Filter):
+class _TradeIdFilter(logging.Filter):  # pylint: disable=too-few-public-methods
     """Filtre qui ajoute un identifiant de trade a chaque entree de log."""
 
     def __init__(self, trade_id: str | None) -> None:

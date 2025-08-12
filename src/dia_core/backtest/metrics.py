@@ -21,7 +21,7 @@ _MIN_EQUITY_LEN = 2
 
 @dataclass(frozen=True)
 class PerfStats:
-    """ """
+    """Statistiques de performance (PnL, Sharpe, DD)."""
 
     total_return: float
     max_drawdown: float
