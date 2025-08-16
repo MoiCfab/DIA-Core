@@ -37,7 +37,7 @@ from dia_core.strategy.utils import (
     build_order_intent,
 )
 
-__all__ = ["AdaptiveParams", "_MOMENTUM_BUY_THRESHOLD"]
+__all__ = ["_MOMENTUM_BUY_THRESHOLD", "AdaptiveParams"]
 
 
 def _interp(a: float, b: float, t: float) -> float:
