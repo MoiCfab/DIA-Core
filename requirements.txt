@@ -1,3 +1,5 @@
+pytest
+jinja2
 python-dotenv
 numpy
 pandas
@@ -7,3 +9,6 @@ tenacity
 scikit-learn
 joblib
 matplotlib
+requests
+PyYAML
+wheel

@@ -1,72 +1,51 @@
-# Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
-# All Rights Reserved — Usage without permission is prohibited
+# Copyright (c) 2025 Fabien Grolier - DYXIUM Invest / D.I.A. Core
+# All Rights Reserved - Usage without permission is prohibited
 
 """
 Nom du module : config/loader.py
 
 Description :
-Charge et valide la configuration principale de DIA-Core à partir d`un fichier JSON.
-Le fichier est transformé en instance de `AppConfig` (modèle Pydantic), avec
-vérification stricte des types et des valeurs.
-
-Fonctions principales :
-- `load_config` : ouvre le fichier, parse le JSON, valide les données via Pydantic.
+Contient la logique de chargement de configuration en fonction du mode.
 
 Utilisé par :
-    main.py (point d'entrée CLI)
-    Services ou scripts qui doivent initialiser DIA-Core avec des paramètres externes
+    ExecutionController
 
 Auteur : DYXIUM Invest / D.I.A. Core
 """
 
-from __future__ import annotations
-
-import json
-
-from pydantic import ValidationError
-
-from .models import AppConfig
+from src.dia_core.config.models import BotConfig
 
 
-def load_config(path: str) -> AppConfig:
-    """Charge la configuration JSON et retourne un objet "AppConfig".
-
-    Args :
-        path : Chemin vers le fichier de configuration JSON.
-
-    Returns :
-        Une instance validée de "AppConfig".
-
-    Raises :
-        SystemExit : Si le fichier est introuvable,
-            si le JSON est invalide,
-            si le format racine n'est pas un objet JSON,
-            ou si la validation Pydantic échoue.
-
-    Exemple :
-            cfg = load_config("config.json")
-            cfg.mode
-        'dry_run'
+def load_config(mode: str) -> BotConfig:
+    """
+    Construit un objet de configuration selon le mode choisi.
 
     Args:
-      path: str:
-      path: str:
+      mode: str:
+        Mode d'exécution ("live", "dry_run", "backtest")
 
     Returns:
-
+      BotConfig
     """
-    try:
-        with open(path, encoding="utf-8") as f:
-            raw = json.load(f)
-    except FileNotFoundError as e:
-        raise SystemExit(f"[CONFIG] Fichier introuvable : {path}") from e
-    except json.JSONDecodeError as e:
-        raise SystemExit(f"[CONFIG] Erreur JSON dans {path} : {e}") from e
+    mode = mode.lower()
 
-    if not isinstance(raw, dict):
-        raise SystemExit("[CONFIG] Format JSON inattendu : un objet est requis à la racine")
+    if mode == "backtest":
+        return BotConfig(
+            mode="backtest",
+            symbols=["BTC/EUR"],
+            data_path="backtest_data/BTC-EUR.csv",
+            initial_equity=10_000.0,
+        )
 
-    try:
-        return AppConfig(**raw)
-    except ValidationError as e:
-        raise SystemExit(f"[CONFIG] Configuration invalide :\n{e}") from e
+    if mode == "live":
+        return BotConfig(
+            mode="live",
+            symbols=None,  # Laisse le scanneur choisir
+            initial_equity=20_000.0,
+        )
+
+    return BotConfig(
+        mode="dry_run",
+        symbols=["BTC/EUR"],
+        initial_equity=5_000.0,
+    )

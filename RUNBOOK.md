@@ -1,9 +1,9 @@
 # 📌 Workflow Git — DIA-Core (solo clean)
 
 ## 1. Créer une nouvelle branche pour une feature ou un fix
-> Nom court et clair : `feat/` pour une fonctionnalité, `fix/` pour une correction.
+> Nom court et clair : 'feat/' pour une fonctionnalité, 'fix/' pour une correction.
 
-```bash
+``` bash
 git checkout -b feat/nom-de-la-feature
 
 #emplacement de environnement
@@ -20,15 +20,15 @@ ruff check src tests --fix
 black src tests
 mypy src tests --strict --pretty --show-error-codes
 pytest -q -vv
-radon cc -s src
+xenon --max-absolute A --max-modules A --max-average A src
 pylint src --fail-under=10.0
-xenon --max-absolute B --max-modules A --max-average A src
+radon cc -s src
 bandit -r src
 semgrep scan --config auto
 pip-audit
 deptry src
 
-# Fusionner dans main quand c’est prêt
+# Fusionner dans main quand c`est prêt
 git checkout main
 git merge feat/nom-de-la-feature
 git push

@@ -17,9 +17,9 @@ Il intègre :
 - Des alertes e-mail en cas de surcharge ou d’événement critique
 
 **Modes d’exécution** :
-- `dry_run` — Simulation hors réseau
-- `paper` — Simulation en conditions réelles, sans fonds
-- `live` — Trading réel avec capital
+- 'dry_run' — Simulation hors réseau
+- 'paper' — Simulation en conditions réelles, sans fonds
+- 'live' — Trading réel avec capital
 
 **Important** :  
 En cas de surcharge, **DIA-Core ne downgradera pas le modèle IA**.  
@@ -42,9 +42,9 @@ Il réduira temporairement le nombre de paires actives et enverra une alerte e-m
 - SSD NVMe
 
 ### Logiciels
-- Linux avec `systemd`
+- Linux avec 'systemd'
 - Python ≥ 3.11
-- `git`, `bash`, `systemctl`
+- 'git', 'bash', 'systemctl'
 - Accès sudo
 
 ---
@@ -53,12 +53,12 @@ Il réduira temporairement le nombre de paires actives et enverra une alerte e-m
 
 | Chemin | Rôle |
 |--------|------|
-| `/opt/dia-core` | Code source et venv |
-| `/opt/dia-core/.venv` | Environnement Python |
-| `/opt/dia-core/Config/config.json` | Configuration principale |
-| `/opt/dia-core/.env` | Clés API et secrets |
-| `/var/log/dia-core` | Logs JSON |
-| `/etc/systemd/system/dia-core.service` | Service systemd |
+| '/opt/dia-core' | Code source et venv |
+| '/opt/dia-core/.venv' | Environnement Python |
+| '/opt/dia-core/Config/config.json' | Configuration principale |
+| '/opt/dia-core/.env' | Clés API et secrets |
+| '/var/log/dia-core' | Logs JSON |
+| '/etc/systemd/system/dia-core.service' | Service systemd |
 
 ---
 
@@ -66,14 +66,14 @@ Il réduira temporairement le nombre de paires actives et enverra une alerte e-m
 
 Depuis la racine du projet :
 
-```bash
+'''bash
 chmod +x scripts/installe_system.sh
 sudo ./scripts/installe_system.sh
-```
+'''
 
 Le script :
-1. Crée l’utilisateur `dia`
-2. Déploie le code dans `/opt/dia-core`
+1. Crée l’utilisateur 'dia'
+2. Déploie le code dans '/opt/dia-core'
 3. Installe le venv et les dépendances
 4. Configure les répertoires Config et Logs
 5. Crée le service systemd et le démarre
@@ -82,64 +82,64 @@ Le script :
 
 ## 5. Configuration
 
-### Fichier `Config/config.json`
+### Fichier 'Config/config.json'
 Contient :
-- Mode (`dry_run`, `paper`, `live`)
+- Mode ('dry_run', 'paper', 'live')
 - Paramètres exchange (paire, décimales, min_qty…)
 - Paramètres de risque (max drawdown, risk per trade…)
 - Répertoires de logs et cache
 
-### Fichier `.env`
+### Fichier '.env'
 Stocke les secrets (exemple pour Kraken + Gmail) :
-```ini
+'''ini
 KRAKEN_API_KEY=xxxxxxxx
 KRAKEN_API_SECRET=xxxxxxxx
 GMAIL_KEY=xxxxxxxx
-```
+'''
 **⚠ Permissions** :
-```bash
+'''bash
 sudo chown dia:dia /opt/dia-core/.env
 sudo chmod 600 /opt/dia-core/.env
-```
+'''
 
 ---
 
 ## 6. Lancement & arrêt
 
 - Démarrer :
-```bash
+'''bash
 sudo systemctl start dia-core
-```
+'''
 
 - Arrêter :
-```bash
+'''bash
 sudo systemctl stop dia-core
-```
+'''
 
 - Redémarrer :
-```bash
+'''bash
 sudo systemctl restart dia-core
-```
+'''
 
 - Activer au démarrage :
-```bash
+'''bash
 sudo systemctl enable dia-core
-```
+'''
 
 - Vérifier l’état :
-```bash
+'''bash
 sudo systemctl status dia-core
-```
+'''
 
 ---
 
 ## 7. Vérification post-installation
 
 Exécuter :
-```bash
+'''bash
 chmod +x scripts/verify_install.sh
 sudo ./scripts/verify_install.sh
-```
+'''
 
 Ce script vérifie :
 - Présence des fichiers et dossiers
@@ -153,26 +153,26 @@ Ce script vérifie :
 
 ## 8. Mise à jour
 
-```bash
+'''bash
 cd /opt/dia-core
 sudo systemctl stop dia-core
 sudo git pull
 sudo -u dia /opt/dia-core/.venv/bin/pip install -r requirements.txt
 sudo systemctl start dia-core
-```
+'''
 
-💡 **Astuce** : tester la mise à jour en `dry_run` avant de repasser en `live`.
+💡 **Astuce** : tester la mise à jour en 'dry_run' avant de repasser en 'live'.
 
 ---
 
 ## 9. Logs & supervision
 
-- Localisation : `/var/log/dia-core`
+- Localisation : '/var/log/dia-core'
 - Format : JSON structuré (rotation + .gz)
 - Lire en direct :
-```bash
+'''bash
 tail -f /var/log/dia-core/app.log
-```
+'''
 
 Surveillance ressources (OverloadGuard) :
 - Seuils CPU/RAM/latence configurables
@@ -184,25 +184,25 @@ Surveillance ressources (OverloadGuard) :
 ## 10. Sécurité
 
 - Utiliser des clés API à permissions minimales
-- Restreindre l’accès à `.env`
-- Droits stricts sur `/opt/dia-core` et `/var/log/dia-core`
-- Utilisateur `dia` sans shell (`nologin`)
+- Restreindre l’accès à '.env'
+- Droits stricts sur '/opt/dia-core' et '/var/log/dia-core'
+- Utilisateur 'dia' sans shell ('nologin')
 
 ---
 
 ## 11. Licence
 
-```
+'''
 Copyright (c) 2025 Fabien Grolier — DYXIUM Invest / DIA-Core
 All Rights Reserved — Usage without permission is prohibited
-```
+'''
 
 ---
 
 ## 12. Bonnes pratiques V3
 
-- Activer les tests automatiques (`pytest`) avant chaque mise en production
-- Linter le code (`ruff`) et vérifier le typage (`mypy --strict`)
+- Activer les tests automatiques ('pytest') avant chaque mise en production
+- Linter le code ('ruff') et vérifier le typage ('mypy --strict')
 - Documenter les nouvelles fonctions avec des docstrings claires
 - Surveiller les alertes e-mail et logs système
 

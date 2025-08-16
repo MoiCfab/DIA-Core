@@ -45,6 +45,7 @@ no_implicit_reexport = true
 show_error_codes = true
 pretty = true
 plugins = ["pydantic.mypy"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

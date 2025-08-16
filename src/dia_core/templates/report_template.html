@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Rapport DIA-Core - {{ date }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    h1 { color: #1d3557; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f1f1f1; }
+  </style>
+</head>
+<body>
+  <h1>📈 Rapport DIA-Core - {{ date }}</h1>
+  <p><strong>Total Trades :</strong> {{ stats.total_trades }}</p>
+  <p><strong>PNL Global :</strong> {{ stats.total_pnl }} €</p>
+  <p><strong>Max Drawdown :</strong> {{ stats.max_drawdown }} €</p>
+
+  <h2>Détails des Trades</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Heure</th><th>Symbole</th><th>Action</th>
+        <th>Taille</th><th>Prix</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for trade in stats.trades %}
+      <tr>
+        <td>{{ trade.timestamp }}</td>
+        <td>{{ trade.symbol }}</td>
+        <td>{{ trade.action }}</td>
+        <td>{{ trade.size }}</td>
+        <td>{{ trade.price }}</td>
+        <td>{{ trade.status }}</td>
+      </tr>
+      {% end for %}
+    </tbody>
+  </table>
+</body>
+</html>
